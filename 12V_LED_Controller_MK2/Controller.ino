@@ -101,26 +101,51 @@ void LoopController() {
 
   //#### API ####//
 
+
+  //#### LED ####//
+  ShowLED();
+
   //-------------- Main State Machine --------------//
   switch (MainState) {
 
-    case 0: ;
+    //Wait for WiFi and MQTT Connection
+    case 0:
+      if ((WiFi.status() == WL_CONNECTED) and mqtt_Client.connected()) {
+        MainState = 10;
+      }
       break;
 
-    case 10: ;
+    //Fade Rest Effects
+    case 10: MainState = 100;
       break;
 
     //Run Mode
     case 100:
 
-      switch (LightState) {
+      //---- LED Strip 1 ----//
+      if (mqtt_LED_Active) {
+        
+        //Normal Light Mode
+        if (!mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
+          FadeColorTo(1, mqtt_LED_Red, mqtt_LED_Green, mqtt_LED_Blue);
+          FadeBrightnessTo(1, mqtt_LED_Brightness);
+        }
+        
+      } else {
+        FadeBrightnessTo(1, 0);
+      }
 
-        case 0: ;
-          break;
-
-        case 10: ;
-          break;
-
+      //---- LED Strip 2 ----//
+      if (mqtt_LED_Active_2) {
+        
+        //Normal Light Mode
+        if (!mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
+          FadeColorTo(2, mqtt_LED_Red_2, mqtt_LED_Green_2, mqtt_LED_Blue_2);
+          FadeBrightnessTo(2, mqtt_LED_Brightness_2);
+        }
+        
+      } else {
+        FadeBrightnessTo(2, 0);
       }
 
       break;
@@ -135,6 +160,10 @@ void LoopController() {
 
     //General Error
     case 999: Error_GerneralError();
+      break;
+
+    //Default Error
+    default: Error_GerneralError();
       break;
   }
 

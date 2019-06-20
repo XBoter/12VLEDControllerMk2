@@ -44,7 +44,8 @@ void mqtt() {
 
       //Global
       //-- Parameter --//
-      mqtt_Client.subscribe( mqtt_value_Global_Fadespeed );
+      mqtt_Client.subscribe( mqtt_value_Global_Color_Fadespeed );
+      mqtt_Client.subscribe( mqtt_value_Global_Brightness_Fadespeed );
       //-- Modes --//
       mqtt_Client.subscribe( mqtt_command_Global_Party );
       mqtt_Client.subscribe( mqtt_command_Global_Weekend );
@@ -90,9 +91,6 @@ void mqtt() {
 //------------------------------------- MQTT Callback -------------------------------------//
 void callback(char* topic, byte * payload, unsigned int length) {
 
-  //For Information Tab
-  Network_NewData = true;
-
   //Get Message
   char message[length + 1];
   for (int i = 0; i < length; i++) {
@@ -102,9 +100,14 @@ void callback(char* topic, byte * payload, unsigned int length) {
 
   //######################################## Global ########################################//
 
-  //------------------- Parameter [mqtt_Global_Fadespeed] -------------------//
-  if (String(mqtt_value_Global_Fadespeed).equals(topic)) {
-    mqtt_Global_Fadespeed = atoi(message);
+  //------------------- Parameter [mqtt_Global_Color_Fadespeed] -------------------//
+  if (String(mqtt_value_Global_Color_Fadespeed).equals(topic)) {
+    mqtt_Global_Color_Fadespeed = atoi(message);
+  }
+
+  //------------------- Parameter [mqtt_Global_Brightness_Fadespeed] -------------------//
+  if (String(mqtt_value_Global_Brightness_Fadespeed).equals(topic)) {
+    mqtt_Global_Brightness_Fadespeed = atoi(message);
   }
 
   //------------------- Parameter [mqtt_Global_Party] -------------------//
