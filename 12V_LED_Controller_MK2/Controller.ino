@@ -72,7 +72,6 @@ void LoopController() {
   //-- Printer --//
   printer();
 
-
   //-------------- Error State Controll for Network  -----------------//
 
   //#### WiFi ####//
@@ -116,55 +115,74 @@ void LoopController() {
       break;
 
     //Fade Rest Effects
-    case 10: MainState = 100;
+    case 10:
+      MainState = 100;
       break;
 
     //Run Mode
     case 100:
 
-      //---- LED Strip 1 ----//
-      if (mqtt_LED_Active) {
-        
-        //Normal Light Mode
-        if (!mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
-          FadeColorTo(1, mqtt_LED_Red, mqtt_LED_Green, mqtt_LED_Blue);
-          FadeBrightnessTo(1, mqtt_LED_Brightness);
+      //---- Normal Light Mode Strip 1 ----//
+      if (!mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
+
+        //---- Strip 1 ----//
+        if (mqtt_LED_Active_1) {
+          NormalLight(1);
+        } else {
+          FadeBrightnessTo(1, 0);
         }
-        
-      } else {
-        FadeBrightnessTo(1, 0);
+
+        //---- Strip 2 ----//
+        if (mqtt_LED_Active_2) {
+          NormalLight(2);
+        } else {
+          FadeBrightnessTo(2, 0);
+        }
+
       }
 
-      //---- LED Strip 2 ----//
-      if (mqtt_LED_Active_2) {
-        
-        //Normal Light Mode
-        if (!mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
-          FadeColorTo(2, mqtt_LED_Red_2, mqtt_LED_Green_2, mqtt_LED_Blue_2);
-          FadeBrightnessTo(2, mqtt_LED_Brightness_2);
-        }
-        
-      } else {
-        FadeBrightnessTo(2, 0);
+      //---- Party Light Mode Strip 1 and 2 ----//
+      if (mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
+        PartyLight();
+      }
+
+      //---- Weekend Light Mode Strip 1 and 2 ----//
+      if (!mqtt_Global_Party and mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
+        WeekendLight();
+      }
+
+      //---- Force Light Mode Strip 1 and 2 ----//
+      if (!mqtt_Global_Party and !mqtt_Global_Weekend and mqtt_Global_Force and !mqtt_Global_GoodNight) {
+        ForceLight();
+      }
+
+      //---- Good Night Light Mode Strip 1 and 2 ----//
+      if (!mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and mqtt_Global_GoodNight) {
+        GoodNightLight();
       }
 
       break;
 
     //No WiFi
-    case 777: Error_NoWiFiConnection();
+    case 777:
+      Error_NoWiFiConnection();
       break;
 
     //No MQTT Broker
-    case 888: Error_NoMqttConnection();
+    case 888:
+      Error_NoMqttConnection();
       break;
 
     //General Error
-    case 999: Error_GerneralError();
+    case 999:
+      Error_GerneralError();
       break;
 
     //Default Error
-    default: Error_GerneralError();
+    default:
+      Error_GerneralError();
       break;
+
   }
 
 }

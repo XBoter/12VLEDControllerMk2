@@ -46,6 +46,7 @@ void mqtt() {
       //-- Parameter --//
       mqtt_Client.subscribe( mqtt_value_Global_Color_Fadespeed );
       mqtt_Client.subscribe( mqtt_value_Global_Brightness_Fadespeed );
+      mqtt_Client.subscribe( mqtt_value_Global_Good_Night_Mode );
       //-- Modes --//
       mqtt_Client.subscribe( mqtt_command_Global_Party );
       mqtt_Client.subscribe( mqtt_command_Global_Weekend );
@@ -110,6 +111,11 @@ void callback(char* topic, byte * payload, unsigned int length) {
     mqtt_Global_Brightness_Fadespeed = atoi(message);
   }
 
+  //------------------- Parameter [mqtt_Global_Good_Night_Timeout] -------------------//
+  if (String(mqtt_value_Global_Good_Night_Mode).equals(topic)) {
+    mqtt_Global_Good_Night_Timeout = atoi(message);
+  }
+
   //------------------- Parameter [mqtt_Global_Party] -------------------//
   if (String(mqtt_command_Global_Party).equals(topic)) {
     mqtt_Global_Party             = atoi(message);
@@ -144,6 +150,9 @@ void callback(char* topic, byte * payload, unsigned int length) {
     mqtt_Client.publish(mqtt_state_Global_Weekend, "0");
     mqtt_Client.publish(mqtt_state_Global_Force, message);
     mqtt_Client.publish(mqtt_state_Global_GoodNight, "0");
+
+    //Generate Start Color
+    StateForce = (int)(random(0, 2)) * 20;
   }
 
   //------------------- Parameter [mqtt_Global_GoodNight] -------------------//
@@ -156,6 +165,10 @@ void callback(char* topic, byte * payload, unsigned int length) {
     mqtt_Client.publish(mqtt_state_Global_Weekend, "0");
     mqtt_Client.publish(mqtt_state_Global_Force, "0");
     mqtt_Client.publish(mqtt_state_Global_GoodNight, message);
+
+    //Reset GoodNight Mode
+    StateGoodNight = 0;
+    PrevMillis_EffectGoodNightMode = millis();
   }
 
   //######################################## Specific ########################################//
@@ -164,21 +177,21 @@ void callback(char* topic, byte * payload, unsigned int length) {
     //------------------- Parameter [mqtt_LED_Active] -------------------//
     if (String(mqtt_command_LED_Active).equals(topic)) {
       mqtt_Client.publish(mqtt_state_LED_Active, message, true);
-      mqtt_LED_Active = atoi(message);
+      mqtt_LED_Active_1 = atoi(message);
     }
 
     //------------------- Parameter [mqtt_LED_Red,mqtt_LED_Green,mqtt_LED_Blue] -------------------//
     if (String(mqtt_command_LED_Color).equals(topic)) {
       mqtt_Client.publish(mqtt_state_LED_Color, message, true);
-      mqtt_LED_Red    = atoi(strtok(message, ","));
-      mqtt_LED_Green  = atoi(strtok(NULL, ","));
-      mqtt_LED_Blue   = atoi(strtok(NULL, ","));
+      mqtt_LED_Red_1    = atoi(strtok(message, ","));
+      mqtt_LED_Green_1  = atoi(strtok(NULL, ","));
+      mqtt_LED_Blue_1   = atoi(strtok(NULL, ","));
     }
 
     //------------------- Parameter [mqtt_LED_Brightness] -------------------//
     if (String(mqtt_command_LED_Brightness).equals(topic)) {
       mqtt_Client.publish(mqtt_state_LED_Brightness, message, true);
-      mqtt_LED_Brightness = atoi(message);
+      mqtt_LED_Brightness_1 = atoi(message);
     }
   }
 

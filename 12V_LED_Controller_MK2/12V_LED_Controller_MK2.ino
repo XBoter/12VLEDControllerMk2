@@ -40,15 +40,15 @@
 #define Name        "12V LED Controller Mk2"
 #define Programmer  "Nico Weidenfeller"
 #define Created     "06.06.2019"
-#define LastModifed "20.06.2019"
-#define Version     "0.0.3"
+#define LastModifed "21.06.2019"
+#define Version     "0.0.4"
 
 /*
   Name          :   12V LED Controller Mk2
   Programmer    :   Nico Weidenfeller
   Created       :   06.06.2019
-  Last Modifed  :   20.06.2019
-  Version       :   0.0.3
+  Last Modifed  :   21.06.2019
+  Version       :   0.0.4
   Description   :
 
   ToDoList      :   - Check Pin Configuration for IR, Motion, LED, DHT
@@ -64,7 +64,9 @@
                     Version 0.0.2
                       Worked on the Pin Config. Added WiFi, MQTT and Information basis code.
                     Version 0.0.3
-                      Fixed Information Print bugs.
+                      Fixed Information Print bugs. Added Brightness and Color Fade.
+                    Version 0.0.4
+                      Added Error Effects and Color Effect Modes.
 
 */
 
@@ -134,23 +136,38 @@ uint8_t ActualBrightnessStrip_2 = 0;
 //---- Normal Light ----//
 
 //---- Party ----//
+uint8_t StatePartyMode      = 0;
+uint8_t PartyColorRedStrip1   = 0;
+uint8_t PartyColorGreenStrip1 = 0;
+uint8_t PartyColorBlueStrip1  = 0;
+uint8_t PartyColorRedStrip2   = 0;
+uint8_t PartyColorGreenStrip2 = 0;
+uint8_t PartyColorBlueStrip2  = 0;
 
 //---- Weekend ----//
+uint8_t StateWeekend = 0;
+uint8_t WeekendColorRed = 255;
+uint8_t WeekendColorGreen = 0;
+uint8_t WeekendColorBlue = 0;
 
 //---- Force ----//
+uint8_t StateForce = 0;
 
 //---- Good Night ----//
+uint8_t StateGoodNight = 0;
 
 //---- Error_NoWiFiConnection ----//
 uint8_t BrightnessErrorNoWiFiConnection = 80;
-uint8_t SwapFadeErrorNoWiFiConnection = true;
+uint8_t StateErrorNoWiFiConnection = 0;
+boolean ErrorNoWiFiSwap = true;
 
 //---- Error_NoMqttConnection ----//
 uint8_t BrightnessErrorNoMqttConnection = 80;
+uint8_t StateErrorNoMqttConnection = 0;
 
 //---- Error_GerneralError ----//
 uint8_t BrightnessErrorGeneral = 80;
-
+uint8_t StateErrorGeneral = 0;
 
 
 //*************************************************************************************************//
@@ -166,6 +183,7 @@ uint8_t NoWiFiCounter = 0;
 //# Global #//
 uint8_t mqtt_Global_Color_Fadespeed      = 20; //Needs Init for Startup with WiFi and MQTT Effect
 uint8_t mqtt_Global_Brightness_Fadespeed = 20; //""
+uint16_t mqtt_Global_Good_Night_Timeout  = 0;  
 uint8_t mqtt_Global_Party                = 0;
 uint8_t mqtt_Global_Weekend              = 0;
 uint8_t mqtt_Global_Force                = 0;
@@ -173,11 +191,12 @@ uint8_t mqtt_Global_GoodNight            = 0;
 
 //# Specific #//
 //---- LED ----//
-uint8_t mqtt_LED_Active         = 0;
-uint8_t mqtt_LED_Red            = 0;
-uint8_t mqtt_LED_Green          = 0;
-uint8_t mqtt_LED_Blue           = 0;
-uint8_t mqtt_LED_Brightness     = 0;
+uint8_t mqtt_LED_Active_1       = 0;
+uint8_t mqtt_LED_Red_1          = 0;
+uint8_t mqtt_LED_Green_1        = 0;
+uint8_t mqtt_LED_Blue_1         = 0;
+uint8_t mqtt_LED_Brightness_1   = 0;
+
 uint8_t mqtt_LED_Active_2       = 0;
 uint8_t mqtt_LED_Red_2          = 0;
 uint8_t mqtt_LED_Green_2        = 0;
@@ -203,16 +222,17 @@ uint16_t Information_LightState              = 0;
 
 uint8_t Information_mqtt_Global_Color_Fadespeed      = 0;
 uint8_t Information_mqtt_Global_Brightness_Fadespeed = 0;
+uint16_t Information_mqtt_Global_Good_Night_Timeout  = 0;
 uint8_t Information_mqtt_Global_Party                = 0;
 uint8_t Information_mqtt_Global_Weekend              = 0;
 uint8_t Information_mqtt_Global_Force                = 0;
 uint8_t Information_mqtt_Global_GoodNight            = 0;
 
-uint8_t Information_mqtt_LED_Active         = 0;
-uint8_t Information_mqtt_LED_Red            = 0;
-uint8_t Information_mqtt_LED_Green          = 0;
-uint8_t Information_mqtt_LED_Blue           = 0;
-uint8_t Information_mqtt_LED_Brightness     = 0;
+uint8_t Information_mqtt_LED_Active_1       = 0;
+uint8_t Information_mqtt_LED_Red_1          = 0;
+uint8_t Information_mqtt_LED_Green_1        = 0;
+uint8_t Information_mqtt_LED_Blue_1         = 0;
+uint8_t Information_mqtt_LED_Brightness_1   = 0;
 uint8_t Information_mqtt_LED_Active_2       = 0;
 uint8_t Information_mqtt_LED_Red_2          = 0;
 uint8_t Information_mqtt_LED_Green_2        = 0;
@@ -236,15 +256,23 @@ uint8_t Information_mqtt_Motion_Timout      = 0;
 unsigned long PrevMillis_Example                     = 0;
 unsigned long PrevMillis_NoWiFiConnected             = 0;
 unsigned long PrevMillis_ErrorNoWiFiConnection       = 0;
+unsigned long PrevMillis_ErrorNoMqttConnection       = 0;
+unsigned long PrevMillis_ErrorGeneral                = 0;
 unsigned long PrevMillis_ColorFadeSpeed              = 0;
 unsigned long PrevMillis_BrightnessFadeSpeedStrip1   = 0;
 unsigned long PrevMillis_BrightnessFadeSpeedStrip2   = 0;
 unsigned long PrevMillis_ColorFadeSpeedStrip1        = 0;
 unsigned long PrevMillis_ColorFadeSpeedStrip2        = 0;
+unsigned long PrevMillis_EffectPartyMode             = 0;
+unsigned long PrevMillis_EffectWeekendMode           = 0;
+unsigned long PrevMillis_EffectForceMode             = 0;
+unsigned long PrevMillis_EffectGoodNightMode         = 0;
 
 unsigned long TimeOut_Example                  = 1000;   // 1.00 Seconds
 unsigned long TimeOut_NoWiFiConnected          = 1000;   // 1.00 Seconds
-unsigned long TimeOut_ErrorEffectSpeed         = 10;     // 0.01 Seconds
+unsigned long TimeOut_ErrorEffectSpeed         = 1000;   // 1.00 Seconds
+unsigned long TimeOut_EffectWeekendMode        = 100;    // 0.10 Seconds
+unsigned long TimeOut_EffectForceMode          = 60000;  // 1.00 Minute
 
 /*
   unsigned long CurMillis_Example = millis();

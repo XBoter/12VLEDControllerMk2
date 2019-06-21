@@ -52,6 +52,16 @@ void printer() {
     Information_mqtt_Global_Brightness_Fadespeed = mqtt_Global_Brightness_Fadespeed;
   }
 
+  //------------------- Parameter [mqtt_Global_Good_Night_Timeout] -------------------//
+  if (mqtt_Global_Good_Night_Timeout != Information_mqtt_Global_Good_Night_Timeout) {
+    Serial.println("/----- MQTT Parameter Change ------/");
+    Serial.print("   Good Night Timeout   : ");
+    Serial.println(mqtt_Global_Good_Night_Timeout);
+    Serial.println("/----------------------------------/");
+    Serial.println("");
+    Information_mqtt_Global_Good_Night_Timeout = mqtt_Global_Good_Night_Timeout;
+  }
+
   //------------------- Parameter [mqtt_Global_Party] -------------------//
   if (mqtt_Global_Party != Information_mqtt_Global_Party) {
     Serial.println("/----- MQTT Parameter Change ------/");
@@ -93,39 +103,39 @@ void printer() {
   }
 
   //------------------- Parameter [mqtt_LED_Active] -------------------//
-  if (mqtt_LED_Active != Information_mqtt_LED_Active) {
+  if (mqtt_LED_Active_1 != Information_mqtt_LED_Active_1) {
     Serial.println("/----- MQTT Parameter Change ------/");
     Serial.print("   LED 1 Active         : ");
-    Serial.println(mqtt_LED_Active);
+    Serial.println(mqtt_LED_Active_1);
     Serial.println("/----------------------------------/");
     Serial.println("");
-    Information_mqtt_LED_Active = mqtt_LED_Active;
+    Information_mqtt_LED_Active_1 = mqtt_LED_Active_1;
   }
 
   //------------------- Parameter [mqtt_LED_Red,mqtt_LED_Green,mqtt_LED_Blue] -------------------//
-  if ((Information_mqtt_LED_Red != mqtt_LED_Red) or (Information_mqtt_LED_Green != mqtt_LED_Green) or (Information_mqtt_LED_Blue != mqtt_LED_Blue)) {
+  if ((Information_mqtt_LED_Red_1 != mqtt_LED_Red_1) or (Information_mqtt_LED_Green_1 != mqtt_LED_Green_1) or (Information_mqtt_LED_Blue_1 != mqtt_LED_Blue_1)) {
     Serial.println("/----- MQTT Parameter Change ------/");
     Serial.print("   LED 1 Red            : ");
-    Serial.println(mqtt_LED_Red);
+    Serial.println(mqtt_LED_Red_1);
     Serial.print("   LED 1 Green          : ");
-    Serial.println(mqtt_LED_Green);
+    Serial.println(mqtt_LED_Green_1);
     Serial.print("   LED 1 Blue           : ");
-    Serial.println(mqtt_LED_Blue);
+    Serial.println(mqtt_LED_Blue_1);
     Serial.println("/----------------------------------/");
     Serial.println("");
-    Information_mqtt_LED_Red    = mqtt_LED_Red;
-    Information_mqtt_LED_Green  = mqtt_LED_Green;
-    Information_mqtt_LED_Blue   = mqtt_LED_Blue;
+    Information_mqtt_LED_Red_1    = mqtt_LED_Red_1;
+    Information_mqtt_LED_Green_1  = mqtt_LED_Green_1;
+    Information_mqtt_LED_Blue_1   = mqtt_LED_Blue_1;
   }
 
   //------------------- Parameter [mqtt_LED_Brightness] -------------------//
-  if (mqtt_LED_Brightness != Information_mqtt_LED_Brightness) {
+  if (mqtt_LED_Brightness_1 != Information_mqtt_LED_Brightness_1) {
     Serial.println("/----- MQTT Parameter Change ------/");
     Serial.print("   LED 1 Brightness     : ");
-    Serial.println(mqtt_LED_Brightness);
+    Serial.println(mqtt_LED_Brightness_1);
     Serial.println("/----------------------------------/");
     Serial.println("");
-    Information_mqtt_LED_Brightness = mqtt_LED_Brightness;
+    Information_mqtt_LED_Brightness_1 = mqtt_LED_Brightness_1;
   }
 
   //------------------- Parameter [mqtt_LED_Active_2] -------------------//
