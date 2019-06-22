@@ -380,6 +380,55 @@ void Error_NoMqttConnection() {
 
 }
 
+//Purple blinking effect to show that no MQTT Connections is available
+void Error_NoApiConnection() {
+
+  unsigned long CurMillis_ErrorNoApiConnection = millis();
+
+  //---- Color Blue ----//
+  SetColorTo(1, 255, 0, 255);
+  SetColorTo(2, 255, 0, 255);
+
+  boolean FadeFinishedStrip1 = false;
+  boolean FadeFinishedStrip2 = false;
+
+  switch (StateErrorNoApiConnection) {
+
+    case 0:
+      FadeFinishedStrip1 = FadeBrightnessTo(1, BrightnessErrorNoApiConnection);
+      FadeFinishedStrip2 = FadeBrightnessTo(2, BrightnessErrorNoApiConnection);
+      if (FadeFinishedStrip1 and FadeFinishedStrip2) {
+        StateErrorNoApiConnection = 10;
+        PrevMillis_ErrorNoApiConnection = CurMillis_ErrorNoApiConnection;
+      }
+      break;
+
+    case 10:
+      if (CurMillis_ErrorNoApiConnection - PrevMillis_ErrorNoApiConnection >= 500) {
+        PrevMillis_ErrorNoApiConnection = CurMillis_ErrorNoApiConnection;
+        StateErrorNoApiConnection = 20;
+      }
+      break;
+
+    case 20:
+      FadeFinishedStrip1 = FadeBrightnessTo(1, 0);
+      FadeFinishedStrip2 = FadeBrightnessTo(2, 0);
+      if (FadeFinishedStrip1 and FadeFinishedStrip2) {
+        StateErrorNoApiConnection = 30;
+        PrevMillis_ErrorNoApiConnection = CurMillis_ErrorNoApiConnection;
+      }
+      break;
+
+    case 30:
+      if (CurMillis_ErrorNoApiConnection - PrevMillis_ErrorNoApiConnection >= 1000) {
+        PrevMillis_ErrorNoApiConnection = CurMillis_ErrorNoApiConnection;
+        StateErrorNoApiConnection = 0;
+      }
+      break;
+  }
+
+}
+
 //Red blinking effect to show that an Error has occurred
 void Error_GerneralError() {
 

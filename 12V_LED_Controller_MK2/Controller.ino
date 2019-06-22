@@ -50,6 +50,7 @@ void SetupController() {
   Serial.println("Finished PIN Initialization");
 
   Serial.println("Finished Setup");
+  Serial.println("");
 }
 
 
@@ -66,11 +67,24 @@ void LoopController() {
   }
   mqtt_Client.loop();
 
+  //-- API --//
+  if ((WiFi.status() == WL_CONNECTED) and mqtt_Client.connected() and !http_Client.connected()) {
+    api();
+  }
+
   //-- HeartBeat --//
   HeartBeat();
 
   //-- Printer --//
   printer();
+
+  //-- GetApiData --//
+  GetApiTimeData();
+  GetApiSunData();
+
+  //-- Motion Detection --//
+  MotionBrightnessControl();
+  MotionDetection();
 
   //-------------- Error State Controll for Network  -----------------//
 
@@ -99,90 +113,113 @@ void LoopController() {
   }
 
   //#### API ####//
+  if ((WiFi.status() == WL_CONNECTED) and (mqtt_Client.connected()) and (!http_Client.connected()) and NoApiError) {
+    LastMainState = MainState;
+    MainState = 999;
+    NoApiError = false;
+  } else {
+    if ((WiFi.status() == WL_CONNECTED) and (mqtt_Client.connected()) and (http_Client.connected()) and !NoApiError) {
+      MainState = LastMainState;
+      NoApiError = true;
+    }
+  }
 
 
-  //#### LED ####//
+  //---- Show LED Strip State ----//
   ShowLED();
 
-  //-------------- Main State Machine --------------//
-  switch (MainState) {
+  //---- Check if Master is Present ----//
+  if (mqtt_Global_MasterPresent) {
 
-    //Wait for WiFi and MQTT Connection
-    case 0:
-      if ((WiFi.status() == WL_CONNECTED) and mqtt_Client.connected()) {
-        MainState = 10;
-      }
-      break;
+    //-------------- Main State Machine --------------//
+    switch (MainState) {
 
-    //Fade Rest Effects
-    case 10:
-      MainState = 100;
-      break;
+      //Wait for WiFi and MQTT Connection
+      case 0:
+        if ((WiFi.status() == WL_CONNECTED) and mqtt_Client.connected()) {
+          MainState = 10;
+        }
+        break;
 
-    //Run Mode
-    case 100:
+      //Fade Rest Effects
+      case 10:
+        MainState = 100;
+        break;
 
-      //---- Normal Light Mode Strip 1 ----//
-      if (!mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
+      //Run Mode
+      case 100:
 
-        //---- Strip 1 ----//
-        if (mqtt_LED_Active_1) {
-          NormalLight(1);
-        } else {
-          FadeBrightnessTo(1, 0);
+        //---- Normal Light Mode Strip 1 ----//
+        if (!mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
+
+          //---- Strip 1 ----//
+          if (mqtt_LED_Active_1) {
+            NormalLight(1);
+          } else {
+            FadeBrightnessTo(1, 0);
+          }
+
+          //---- Strip 2 ----//
+          if (mqtt_LED_Active_2) {
+            NormalLight(2);
+          } else {
+            FadeBrightnessTo(2, 0);
+          }
+
         }
 
-        //---- Strip 2 ----//
-        if (mqtt_LED_Active_2) {
-          NormalLight(2);
-        } else {
-          FadeBrightnessTo(2, 0);
+        //---- Party Light Mode Strip 1 and 2 ----//
+        if (mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
+          PartyLight();
         }
 
-      }
+        //---- Weekend Light Mode Strip 1 and 2 ----//
+        if (!mqtt_Global_Party and mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
+          WeekendLight();
+        }
 
-      //---- Party Light Mode Strip 1 and 2 ----//
-      if (mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
-        PartyLight();
-      }
+        //---- Force Light Mode Strip 1 and 2 ----//
+        if (!mqtt_Global_Party and !mqtt_Global_Weekend and mqtt_Global_Force and !mqtt_Global_GoodNight) {
+          ForceLight();
+        }
 
-      //---- Weekend Light Mode Strip 1 and 2 ----//
-      if (!mqtt_Global_Party and mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
-        WeekendLight();
-      }
+        //---- Good Night Light Mode Strip 1 and 2 ----//
+        if (!mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and mqtt_Global_GoodNight) {
+          GoodNightLight();
+        }
 
-      //---- Force Light Mode Strip 1 and 2 ----//
-      if (!mqtt_Global_Party and !mqtt_Global_Weekend and mqtt_Global_Force and !mqtt_Global_GoodNight) {
-        ForceLight();
-      }
+        break;
 
-      //---- Good Night Light Mode Strip 1 and 2 ----//
-      if (!mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and mqtt_Global_GoodNight) {
-        GoodNightLight();
-      }
+      //No WiFi Connection
+      case 777:
+        Error_NoWiFiConnection();
+        break;
 
-      break;
+      //No MQTT Broker Connection
+      case 888:
+        Error_NoMqttConnection();
+        break;
 
-    //No WiFi
-    case 777:
-      Error_NoWiFiConnection();
-      break;
+      //No API Connection
+      case 999:
+        Error_NoApiConnection();
+        break;
 
-    //No MQTT Broker
-    case 888:
-      Error_NoMqttConnection();
-      break;
+      //General Error
+      case 1111:
+        Error_GerneralError();
+        break;
 
-    //General Error
-    case 999:
-      Error_GerneralError();
-      break;
+      //Default Error
+      default:
+        Error_GerneralError();
+        break;
 
-    //Default Error
-    default:
-      Error_GerneralError();
-      break;
+    }
 
+  } else {
+    FadeBrightnessTo(1, 0);
+    FadeBrightnessTo(2, 0);
   }
 
 }

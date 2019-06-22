@@ -30,13 +30,49 @@ void printer() {
 #endif
 
 
+#ifdef DEBUG_API_DATA
+
+  if ((Information_api_TimeHour != api_TimeHour) or (Information_api_TimeMinute != api_TimeMinute)) {
+    Serial.println("/-------- API Data Change ---------/");
+    Serial.print("   Time              : ");
+    Serial.print(api_TimeHour);
+    Serial.print(":");
+    Serial.println(api_TimeMinute);
+    Serial.println("/----------------------------------/");
+    Serial.println("");
+    Information_api_TimeHour = api_TimeHour;
+    Information_api_TimeMinute = api_TimeMinute;
+  }
+
+  if (Information_api_SunDown != api_SunDown) {
+    Serial.println("/-------- API Data Change ---------/");
+    Serial.print("   Sun Down          : ");
+    Serial.println(api_SunDown);
+    Serial.println("/----------------------------------/");
+    Serial.println("");
+    Information_api_SunDown = api_SunDown;
+  }
+
+#endif
+
+
 #ifdef DEBUG_MQTT_PARAMETER
+
+  //------------------- Parameter [mqtt_Global_MasterPresent] -------------------//
+  if (mqtt_Global_MasterPresent != Information_mqtt_Global_MasterPresent) {
+    Serial.println("/----- MQTT Parameter Change ------/");
+    Serial.print("   Master Present       : ");
+    Serial.println(mqtt_Global_MasterPresent);
+    Serial.println("/----------------------------------/");
+    Serial.println("");
+    Information_mqtt_Global_MasterPresent = mqtt_Global_MasterPresent;
+  }
 
   //------------------- Parameter [mqtt_Global_Color_Fadespeed] -------------------//
   if (mqtt_Global_Color_Fadespeed != Information_mqtt_Global_Color_Fadespeed) {
     Serial.println("/----- MQTT Parameter Change ------/");
     Serial.print("   Fadespeed Color      : ");
-    Serial.println(Information_mqtt_Global_Color_Fadespeed);
+    Serial.println(mqtt_Global_Color_Fadespeed);
     Serial.println("/----------------------------------/");
     Serial.println("");
     Information_mqtt_Global_Color_Fadespeed = mqtt_Global_Color_Fadespeed;

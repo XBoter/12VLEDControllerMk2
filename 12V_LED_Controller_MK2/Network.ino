@@ -33,6 +33,17 @@ void wifi() {
 
 }
 
+//------------------------------------- API Control -------------------------------------//
+void api() {
+
+  //Wait for WiFi Connection
+  if (!http_Client.connected() and WiFi.status() == WL_CONNECTED) {
+    //Try to Connect to HTTP
+    http_Client.connect(http_ip, http_port);
+  }
+
+}
+
 //------------------------------------- MQTT Control -------------------------------------//
 void mqtt() {
 
@@ -43,6 +54,8 @@ void mqtt() {
       Serial.println("Start channel subscription");
 
       //Global
+      //-- Master --//
+      mqtt_Client.subscribe( mqtt_command_Global_Master_Present );
       //-- Parameter --//
       mqtt_Client.subscribe( mqtt_value_Global_Color_Fadespeed );
       mqtt_Client.subscribe( mqtt_value_Global_Brightness_Fadespeed );
@@ -100,6 +113,15 @@ void callback(char* topic, byte * payload, unsigned int length) {
   message[length] = '\0';
 
   //######################################## Global ########################################//
+
+  //------------------- Parameter [mqtt_Global_MasterPresent] -------------------//
+  if (String(mqtt_command_Global_Master_Present).equals(topic)) {
+    if (strcmp(message, "home") == 0) {
+      mqtt_Global_MasterPresent = 1;
+    } else {
+      mqtt_Global_MasterPresent = 0;
+    }
+  }
 
   //------------------- Parameter [mqtt_Global_Color_Fadespeed] -------------------//
   if (String(mqtt_value_Global_Color_Fadespeed).equals(topic)) {
