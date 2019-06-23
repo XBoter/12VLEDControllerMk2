@@ -210,44 +210,14 @@ void printer() {
     Information_mqtt_LED_Brightness_2 = mqtt_LED_Brightness_2;
   }
 
-  //------------------- Parameter [mqtt_IR_Active] -------------------//
-  if (mqtt_IR_Active != Information_mqtt_IR_Active) {
-    Serial.println("/----- MQTT Parameter Change ------/");
-    Serial.print("   IR Active            : ");
-    Serial.println(mqtt_IR_Active);
-    Serial.println("/----------------------------------/");
-    Serial.println("");
-    Information_mqtt_IR_Active = mqtt_IR_Active;
-  }
-
-  //------------------- Parameter [mqtt_API_Active] -------------------//
-  if (mqtt_API_Active != Information_mqtt_API_Active) {
-    Serial.println("/----- MQTT Parameter Change ------/");
-    Serial.print("   API Active           : ");
-    Serial.println(mqtt_API_Active);
-    Serial.println("/----------------------------------/");
-    Serial.println("");
-    Information_mqtt_API_Active = mqtt_API_Active;
-  }
-
   //------------------- Parameter [mqtt_Motion_Active] -------------------//
-  if (mqtt_Motion_Active != Information_mqtt_Motion_Active) {
+  if (mqtt_Global_Motion_Active != Information_mqtt_Global_Motion_Active) {
     Serial.println("/----- MQTT Parameter Change ------/");
-    Serial.print("   Motion 1 Active      : ");
-    Serial.println(mqtt_Motion_Active);
+    Serial.print("   Motion Active        : ");
+    Serial.println(mqtt_Global_Motion_Active);
     Serial.println("/----------------------------------/");
     Serial.println("");
-    Information_mqtt_Motion_Active = mqtt_Motion_Active;
-  }
-
-  //------------------- Parameter [mqtt_Motion_Second] -------------------//
-  if (mqtt_Motion_Second != Information_mqtt_Motion_Second) {
-    Serial.println("/----- MQTT Parameter Change ------/");
-    Serial.print("   Motion 2 Active      : ");
-    Serial.println(mqtt_Motion_Second);
-    Serial.println("/----------------------------------/");
-    Serial.println("");
-    Information_mqtt_Motion_Second = mqtt_Motion_Second;
+    Information_mqtt_Global_Motion_Active = mqtt_Global_Motion_Active;
   }
 
   //------------------- Parameter [mqtt_Motion_Timout] -------------------//
@@ -260,7 +230,23 @@ void printer() {
     Information_mqtt_Motion_Timout = mqtt_Motion_Timout;
   }
 
+#endif
+
+
+#ifdef DEBUG_MOTION
+
+  //------------------- PIR Sensor -------------------//
+  if (PirSensorMotionDetected != Information_PirSensorMotionDetected) {
+    Serial.println("/------ PIR Motion Detected -------/");
+    Serial.print("   Motion Detected      : ");
+    Serial.println(PirSensorMotionDetected);
+    Serial.println("/----------------------------------/");
+    Serial.println("");
+    Information_PirSensorMotionDetected = PirSensorMotionDetected;
+  }
 
 #endif
+
+
 
 }

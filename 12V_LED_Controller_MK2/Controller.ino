@@ -23,6 +23,8 @@ void SetupController() {
   Serial.println("Finished setting MQTT Parameter");
 
   Serial.println("Start PIN Initialization");
+
+  //---------------- LED Strip ----------------//
   if (LED_STRIP_COUNT == 2) {
     Serial.println("LED Strip     1: D1,D2,D3");
     pinMode(PIN_LED_STRIP_1_RED, OUTPUT);
@@ -32,21 +34,39 @@ void SetupController() {
     pinMode(PIN_LED_STRIP_2_RED, OUTPUT);
     pinMode(PIN_LED_STRIP_2_GREEN, OUTPUT);
     pinMode(PIN_LED_STRIP_2_BLUE, OUTPUT);
-  } else {
+  }
+  if (LED_STRIP_COUNT == 1) {
     Serial.println("LED Strip     1: D1,D2,D3");
     pinMode(PIN_LED_STRIP_1_RED, OUTPUT);
     pinMode(PIN_LED_STRIP_1_GREEN, OUTPUT);
     pinMode(PIN_LED_STRIP_1_BLUE, OUTPUT);
-    if (MOTION_SENSORS == 2) {
-      Serial.println("Motion Sensor 1: D7");
-      pinMode(PIN_MOTION_SENSOR_1, INPUT);
-      Serial.println("Motion Sensor 2: D6");
-      pinMode(PIN_MOTION_SENSOR_2, INPUT);
-    } else {
-      Serial.println("Motion Sensor 1: D7");
-      pinMode(PIN_MOTION_SENSOR_1, INPUT);
-    }
   }
+
+  //---------------- Motion Sensor ----------------//
+  if (MOTION_SENSORS == 2 and LED_STRIP_COUNT <= 1) {
+    Serial.println("Motion Sensor 1: D7");
+    pinMode(PIN_MOTION_SENSOR_1, INPUT);
+    Serial.println("Motion Sensor 2: D6");
+    pinMode(PIN_MOTION_SENSOR_2, INPUT);
+
+  }
+  if (MOTION_SENSORS == 1 and LED_STRIP_COUNT <= 1) {
+    Serial.println("Motion Sensor 1: D7");
+    pinMode(PIN_MOTION_SENSOR_1, INPUT);
+  }
+
+  //----------------- IR Receiver -----------------//
+  if (IR_RECIVER == 1 and LED_STRIP_COUNT <= 1) {
+    Serial.println("IR Reciver    1: D5");
+    pinMode(PIN_IR, INPUT);
+  }
+
+  //------------------ DHT Sensor -----------------//
+  if (DHT_SENSOR == 1 and MOTION_SENSORS <= 1 and LED_STRIP_COUNT <= 1) {
+    Serial.println("DHT Sensor    1: D6");
+    pinMode(PIN_DHT, INPUT);
+  }
+
   Serial.println("Finished PIN Initialization");
 
   Serial.println("Finished Setup");
@@ -86,6 +106,12 @@ void LoopController() {
   MotionBrightnessControl();
   MotionDetection();
 
+  //-- IR Receiver --//
+  IRControl();
+
+  //-- DHT Sensor --//
+  ReadDHTSensorData();
+
   //-------------- Error State Controll for Network  -----------------//
 
   //#### WiFi ####//
@@ -113,16 +139,18 @@ void LoopController() {
   }
 
   //#### API ####//
-  if ((WiFi.status() == WL_CONNECTED) and (mqtt_Client.connected()) and (!http_Client.connected()) and NoApiError) {
+  /* Cant be used because after sucessfull API call the connections is closed
+    if ((WiFi.status() == WL_CONNECTED) and (mqtt_Client.connected()) and (!http_Client.connected()) and NoApiError) {
     LastMainState = MainState;
     MainState = 999;
     NoApiError = false;
-  } else {
+    } else {
     if ((WiFi.status() == WL_CONNECTED) and (mqtt_Client.connected()) and (http_Client.connected()) and !NoApiError) {
       MainState = LastMainState;
       NoApiError = true;
     }
-  }
+    }
+  */
 
 
   //---- Show LED Strip State ----//
@@ -156,14 +184,24 @@ void LoopController() {
           if (mqtt_LED_Active_1) {
             NormalLight(1);
           } else {
-            FadeBrightnessTo(1, 0);
+            if (MotionOccured) {
+              SetColorTo(1, MotionColorRed, MotionColorGreen, MotionColorBlue);
+              FadeBrightnessTo(1, MotionBrightness);
+            } else {
+              FadeBrightnessTo(1, 0);
+            }
           }
 
           //---- Strip 2 ----//
           if (mqtt_LED_Active_2) {
             NormalLight(2);
           } else {
-            FadeBrightnessTo(2, 0);
+            if (MotionOccured) {
+              SetColorTo(2, MotionColorRed, MotionColorGreen, MotionColorBlue);
+              FadeBrightnessTo(2, MotionBrightness);
+            } else {
+              FadeBrightnessTo(2, 0);
+            }
           }
 
         }

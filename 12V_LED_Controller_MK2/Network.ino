@@ -56,10 +56,13 @@ void mqtt() {
       //Global
       //-- Master --//
       mqtt_Client.subscribe( mqtt_command_Global_Master_Present );
+
       //-- Parameter --//
       mqtt_Client.subscribe( mqtt_value_Global_Color_Fadespeed );
       mqtt_Client.subscribe( mqtt_value_Global_Brightness_Fadespeed );
       mqtt_Client.subscribe( mqtt_value_Global_Good_Night_Mode );
+      mqtt_Client.subscribe( mqtt_command_Global_Motion_Active );
+
       //-- Modes --//
       mqtt_Client.subscribe( mqtt_command_Global_Party );
       mqtt_Client.subscribe( mqtt_command_Global_Weekend );
@@ -79,20 +82,8 @@ void mqtt() {
         mqtt_Client.subscribe( mqtt_command_LED_Brightness_2 );
       }
 
-      //-- IR --//
-      if (IR_RECIVER >= 1) {
-        mqtt_Client.subscribe( mqtt_command_IR_Active );
-      }
-
-      //-- API --//
-      if (MOTION_SENSORS >= 1) {
-        mqtt_Client.subscribe( mqtt_command_API_Active );
-      }
-
       //-- Motion --//
       if (MOTION_SENSORS >= 1) {
-        mqtt_Client.subscribe( mqtt_command_Motion_Active );
-        mqtt_Client.subscribe( mqtt_command_Motion_Second );
         mqtt_Client.subscribe( mqtt_value_Motion_Timeout );
       }
 
@@ -136,6 +127,12 @@ void callback(char* topic, byte * payload, unsigned int length) {
   //------------------- Parameter [mqtt_Global_Good_Night_Timeout] -------------------//
   if (String(mqtt_value_Global_Good_Night_Mode).equals(topic)) {
     mqtt_Global_Good_Night_Timeout = atoi(message);
+  }
+
+  //------------------- Parameter [mqtt_Global_Motion_Active] -------------------//
+  if (String(mqtt_command_Global_Motion_Active).equals(topic)) {
+    mqtt_Client.publish(mqtt_state_Global_Motion_Active, message);
+    mqtt_Global_Motion_Active = atoi(message);
   }
 
   //------------------- Parameter [mqtt_Global_Party] -------------------//
@@ -239,42 +236,22 @@ void callback(char* topic, byte * payload, unsigned int length) {
     }
   }
 
-  if (IR_RECIVER >= 1) {
-    //------------------- Parameter [mqtt_IR_Active] -------------------//
-    if (String(mqtt_command_IR_Active).equals(topic)) {
-      mqtt_Client.publish(mqtt_state_IR_Active, message, true);
-      mqtt_IR_Active = atoi(message);
-    }
-  }
-
-  if (MOTION_SENSORS >= 1) {
-    //------------------- Parameter [mqtt_API_Active] -------------------//
-    if (String(mqtt_command_API_Active).equals(topic)) {
-      mqtt_Client.publish(mqtt_state_API_Active, message, true);
-      mqtt_IR_Active = atoi(message);
-    }
-
-    //------------------- Parameter [mqtt_Motion_Active] -------------------//
-    if (String(mqtt_command_Motion_Active).equals(topic)) {
-      mqtt_Client.publish(mqtt_state_Motion_Active, message, true);
-      mqtt_Motion_Active = atoi(message);
-    }
-
-    //------------------- Parameter [mqtt_Motion_Second] -------------------//
-    if (String(mqtt_command_Motion_Second).equals(topic)) {
-      mqtt_Client.publish(mqtt_state_Motion_Second, message, true);
-      mqtt_Motion_Second = atoi(message);
-    }
-
-    //------------------- Parameter [mqtt_Motion_Timout] -------------------//
-    if (String(mqtt_value_Motion_Timeout).equals(topic)) {
-      mqtt_Motion_Timout = atoi(message);
-    }
+  //------------------- Parameter [mqtt_Motion_Timout] -------------------//
+  if (String(mqtt_value_Motion_Timeout).equals(topic)) {
+    mqtt_Motion_Timout = atoi(message);
   }
 
 }
 
 
 void HeartBeat() {
+
+  //Heartbeat
+  unsigned long CurMillis_HeartBeat = millis();
+  if (CurMillis_HeartBeat - PrevMillis_HeartBeat >= TimeOut_HeartBeat) {
+    PrevMillis_HeartBeat = CurMillis_HeartBeat;
+    mqtt_Client.publish(mqtt_Heartbeat, HeartBeatCounter);
+    HeartBeatCounter++;
+  }
 
 }

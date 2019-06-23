@@ -26,6 +26,8 @@ void GetApiSunData() {
           } else {
             api_SunDown = 0;
           }
+          //Flush Data after
+          http_Client.flush();
           break;
         } else {
           timeData = http_Client.readStringUntil('"');
@@ -69,6 +71,8 @@ void GetApiTimeData() {
           minute = http_Client.readStringUntil('"');    //Time Minutes
           api_TimeHour = hour.toInt();
           api_TimeMinute = minute.toInt();
+          //Flush Data after
+          http_Client.flush();
           break;
         } else {
           timeData = http_Client.readStringUntil('"');

@@ -1,10 +1,9 @@
 
-//Config for Functions of the Controller
+//Config for Functions of the Controller (Prio from Top to Bottom)
 #define LED_STRIP_COUNT 2   //Defines how many LED Strips are Controlled    (Options: 1 and 2)
-#define MOTION_SENSORS 1    //Defines how many Motion Sensors are available (Options: 0, 1 and 2)
+#define MOTION_SENSORS 0    //Defines how many Motion Sensors are available (Options: 0, 1 and 2)
+#define IR_RECIVER 0        //Defines how many IR Receiver are available    (Options: 0 and 1)
 #define DHT_SENSOR 0        //Defines how many DHT Sensors are available    (Options: 0 and 1)
-#define IR_RECIVER 1        //Defines how many IR Receiver are available    (Options: 0 and 1)
-
 
 //+++ Include Libarys +++//
 #include <Arduino.h>
@@ -35,21 +34,22 @@
 #define DEBUG_LIGHT_STATE
 #define DEBUG_MQTT_PARAMETER
 #define DEBUG_API_DATA
+#define DEBUG_MOTION
 
 //-------------------- Basic Information --------------------//
 //for Serial print Startup Info
 #define Name        "12V LED Controller Mk2"
 #define Programmer  "Nico Weidenfeller"
 #define Created     "06.06.2019"
-#define LastModifed "22.06.2019"
-#define Version     "0.0.5"
+#define LastModifed "23.06.2019"
+#define Version     "0.0.6"
 
 /*
   Name          :   12V LED Controller Mk2
   Programmer    :   Nico Weidenfeller
   Created       :   06.06.2019
-  Last Modifed  :   22.06.2019
-  Version       :   0.0.5
+  Last Modifed  :   23.06.2019
+  Version       :   0.0.6
   Description   :
 
   ToDoList      :   - Check Pin Configuration for IR, Motion, LED, DHT
@@ -70,6 +70,8 @@
                       Added Error Effects and Color Effect Modes.
                     Version 0.0.5
                       Added API support. And Master Present switch. Added Motion Tab
+                    Version 0.0.6 
+                      Added Motion Detection and HeartBeat.
 
 */
 
@@ -83,12 +85,10 @@
 #define PIN_LED_STRIP_2_RED D7
 #define PIN_LED_STRIP_2_GREEN D6
 #define PIN_LED_STRIP_2_BLUE D5
-
 #define PIN_IR D5
 #define PIN_DHT D6
 #define PIN_MOTION_SENSOR_2 D6
 #define PIN_MOTION_SENSOR_1 D7
-
 
 //*************************************************************************************************//
 //--------------------------------------------- SHARED --------------------------------------------//
@@ -140,8 +140,6 @@ uint8_t ActualColorGreenStrip_2 = 0;
 uint8_t ActualColorBlueStrip_2  = 0;
 uint8_t ActualBrightnessStrip_2 = 0;
 
-//---- Normal Light ----//
-
 //---- Party ----//
 uint8_t StatePartyMode      = 0;
 uint8_t PartyColorRedStrip1   = 0;
@@ -189,6 +187,8 @@ uint8_t MotionColorRed   = 255;
 uint8_t MotionColorGreen = 63;
 uint8_t MotionColorBlue  = 0;
 
+uint8_t MotionOccured = 0;
+uint8_t PirSensorMotionDetected = 0;
 
 //*************************************************************************************************//
 //--------------------------------------------- Network -------------------------------------------//
@@ -197,6 +197,7 @@ WiFiClient    wifiMqtt;
 PubSubClient  mqtt_Client(wifiMqtt);
 boolean StartWifi = true;
 uint8_t NoWiFiCounter = 0;
+uint16_t HeartBeatCounter = 0;
 
 //---- Parameter List ----//
 
@@ -208,6 +209,7 @@ uint8_t mqtt_Global_Party                = 0;
 uint8_t mqtt_Global_Weekend              = 0;
 uint8_t mqtt_Global_Force                = 0;
 uint8_t mqtt_Global_GoodNight            = 0;
+uint8_t mqtt_Global_Motion_Active        = 0;
 uint8_t mqtt_Global_MasterPresent        = 0;
 
 //# Specific #//
@@ -224,15 +226,6 @@ uint8_t mqtt_LED_Green_2        = 0;
 uint8_t mqtt_LED_Blue_2         = 0;
 uint8_t mqtt_LED_Brightness_2   = 0;
 
-//---- IR ----//
-uint8_t mqtt_IR_Active          = 0;
-
-//---- API ----//
-uint8_t mqtt_API_Active         = 0;
-
-//---- Motion ----//
-uint8_t mqtt_Motion_Active      = 0;
-uint8_t mqtt_Motion_Second      = 0;
 uint8_t mqtt_Motion_Timout      = 0;
 
 //*************************************************************************************************//
@@ -248,6 +241,7 @@ uint8_t Information_mqtt_Global_Party                = 0;
 uint8_t Information_mqtt_Global_Weekend              = 0;
 uint8_t Information_mqtt_Global_Force                = 0;
 uint8_t Information_mqtt_Global_GoodNight            = 0;
+uint8_t Information_mqtt_Global_Motion_Active        = 0;
 uint8_t Information_mqtt_Global_MasterPresent        = 0;
 
 uint8_t Information_mqtt_LED_Active_1       = 0;
@@ -261,17 +255,13 @@ uint8_t Information_mqtt_LED_Green_2        = 0;
 uint8_t Information_mqtt_LED_Blue_2         = 0;
 uint8_t Information_mqtt_LED_Brightness_2   = 0;
 
-uint8_t Information_mqtt_IR_Active          = 0;
-
-uint8_t Information_mqtt_API_Active         = 0;
-
-uint8_t Information_mqtt_Motion_Active      = 0;
-uint8_t Information_mqtt_Motion_Second      = 0;
 uint8_t Information_mqtt_Motion_Timout      = 0;
 
 uint8_t Information_api_TimeHour            = 0;
 uint8_t Information_api_TimeMinute          = 0;
 uint8_t Information_api_SunDown             = 0;
+
+uint8_t Information_PirSensorMotionDetected = 0;
 
 //*************************************************************************************************//
 //---------------------------------------------- Delay --------------------------------------------//
@@ -295,6 +285,8 @@ unsigned long PrevMillis_EffectForceMode             = 0;
 unsigned long PrevMillis_EffectGoodNightMode         = 0;
 unsigned long PrevMillis_ApiTimeUpdateRate           = 0;
 unsigned long PrevMillis_ApiSunUpdateRate            = 0;
+unsigned long PrevMillis_MotionDetected              = 0;
+unsigned long PrevMillis_HeartBeat                   = 0;
 
 
 unsigned long TimeOut_Example                  = 1000;   // 1.00 Seconds
@@ -302,7 +294,8 @@ unsigned long TimeOut_NoWiFiConnected          = 1000;   // 1.00 Seconds
 unsigned long TimeOut_ErrorEffectSpeed         = 1000;   // 1.00 Seconds
 unsigned long TimeOut_EffectWeekendMode        = 100;    // 0.10 Seconds
 unsigned long TimeOut_EffectForceMode          = 60000;  // 1.00 Minute
-unsigned long TimeOut_ApiUpdateRate            = 1000;//60000;  // 1.00 Minute
+unsigned long TimeOut_ApiUpdateRate            = 60000;  // 1.00 Minute
+unsigned long TimeOut_HeartBeat                = 300000; // 5.00 Minute
 
 /*
   unsigned long CurMillis_Example = millis();
