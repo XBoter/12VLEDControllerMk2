@@ -1,17 +1,17 @@
 
 //Config for Functions of the Controller (Prio from Top to Bottom)
-#define LED_STRIP_COUNT 2   //Defines how many LED Strips are Controlled    (Options: 1 and 2)
-#define MOTION_SENSORS 0    //Defines how many Motion Sensors are available (Options: 0, 1 and 2)
-#define IR_RECIVER 0        //Defines how many IR Receiver are available    (Options: 0 and 1)
+#define LED_STRIP_COUNT 1   //Defines how many LED Strips are Controlled    (Options: 1 and 2)
+#define MOTION_SENSORS 2    //Defines how many Motion Sensors are available (Options: 0, 1 and 2)
+#define IR_RECIVER 1        //Defines how many IR Receiver are available    (Options: 0 and 1)
 #define DHT_SENSOR 0        //Defines how many DHT Sensors are available    (Options: 0 and 1)
 
 //+++ Include Libarys +++//
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
-//#include <IRremoteESP8266.h>
-//#include <IRrecv.h>
-//#include <IRutils.h>
+#include <IRremoteESP8266.h>
+#include <IRrecv.h>
+#include <IRutils.h>
 //#include <DHT.h>
 //#include <DHT_U.h>
 
@@ -35,6 +35,7 @@
 #define DEBUG_MQTT_PARAMETER
 #define DEBUG_API_DATA
 #define DEBUG_MOTION
+#define DEBUG_IR
 
 //-------------------- Basic Information --------------------//
 //for Serial print Startup Info
@@ -49,7 +50,7 @@
   Programmer    :   Nico Weidenfeller
   Created       :   06.06.2019
   Last Modifed  :   23.06.2019
-  Version       :   0.0.6
+  Version       :   0.0.7
   Description   :
 
   ToDoList      :   - Check Pin Configuration for IR, Motion, LED, DHT
@@ -72,6 +73,9 @@
                       Added API support. And Master Present switch. Added Motion Tab
                     Version 0.0.6 
                       Added Motion Detection and HeartBeat.
+                    Version 0.0.7
+                      Added IR and fixed bugs.
+                      
 
 */
 
@@ -124,7 +128,8 @@ uint8_t api_SunDown = 0;
 //*************************************************************************************************//
 //----------------------------------------------- IR ----------------------------------------------//
 //*************************************************************************************************//
-
+IRrecv IrRecv(PIN_IR); 
+decode_results IrRecvResult;
 
 //*************************************************************************************************//
 //---------------------------------------------- LED ----------------------------------------------//
@@ -188,7 +193,8 @@ uint8_t MotionColorGreen = 63;
 uint8_t MotionColorBlue  = 0;
 
 uint8_t MotionOccured = 0;
-uint8_t PirSensorMotionDetected = 0;
+uint8_t PirSensor1MotionDetected = 0;
+uint8_t PirSensor2MotionDetected = 0;
 
 //*************************************************************************************************//
 //--------------------------------------------- Network -------------------------------------------//
@@ -261,7 +267,8 @@ uint8_t Information_api_TimeHour            = 0;
 uint8_t Information_api_TimeMinute          = 0;
 uint8_t Information_api_SunDown             = 0;
 
-uint8_t Information_PirSensorMotionDetected = 0;
+uint8_t Information_PirSensor1MotionDetected = 0;
+uint8_t Information_PirSensor2MotionDetected = 0;
 
 //*************************************************************************************************//
 //---------------------------------------------- Delay --------------------------------------------//

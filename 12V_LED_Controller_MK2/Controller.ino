@@ -58,7 +58,7 @@ void SetupController() {
   //----------------- IR Receiver -----------------//
   if (IR_RECIVER == 1 and LED_STRIP_COUNT <= 1) {
     Serial.println("IR Reciver    1: D5");
-    pinMode(PIN_IR, INPUT);
+    IrRecv.enableIRIn();
   }
 
   //------------------ DHT Sensor -----------------//

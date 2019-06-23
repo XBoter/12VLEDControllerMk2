@@ -13,17 +13,25 @@ void MotionDetection() {
     MotionDetectedSensor1 = digitalRead(PIN_MOTION_SENSOR_1);
   }
 
+  //For Information Tab
+  if (MotionDetectedSensor1) {
+    PirSensor1MotionDetected = true;
+  } else {
+    PirSensor1MotionDetected = false;
+  }
+
   //Read Motion Sensor 2 Data
   if (LED_STRIP_COUNT <= 1 and MOTION_SENSORS == 2) {
     MotionDetectedSensor2 = digitalRead(PIN_MOTION_SENSOR_2);
   }
 
   //For Information Tab
-  if (MotionDetectedSensor1 or MotionDetectedSensor2) {
-    PirSensorMotionDetected = true;
+  if (MotionDetectedSensor2) {
+    PirSensor2MotionDetected = true;
   } else {
-    PirSensorMotionDetected = false;
+    PirSensor2MotionDetected = false;
   }
+
 
   //If sun is below horizon activate Motion Detection
   if (api_SunDown and mqtt_Global_Motion_Active) {

@@ -250,7 +250,9 @@ void HeartBeat() {
   unsigned long CurMillis_HeartBeat = millis();
   if (CurMillis_HeartBeat - PrevMillis_HeartBeat >= TimeOut_HeartBeat) {
     PrevMillis_HeartBeat = CurMillis_HeartBeat;
-    mqtt_Client.publish(mqtt_Heartbeat, HeartBeatCounter);
+    char message[20];
+    sprintf(message, "%ld", HeartBeatCounter);
+    mqtt_Client.publish(mqtt_Heartbeat, message);
     HeartBeatCounter++;
   }
 

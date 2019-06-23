@@ -236,13 +236,23 @@ void printer() {
 #ifdef DEBUG_MOTION
 
   //------------------- PIR Sensor -------------------//
-  if (PirSensorMotionDetected != Information_PirSensorMotionDetected) {
+  if (PirSensor1MotionDetected != Information_PirSensor1MotionDetected) {
     Serial.println("/------ PIR Motion Detected -------/");
-    Serial.print("   Motion Detected      : ");
-    Serial.println(PirSensorMotionDetected);
+    Serial.print("   Motion Sensor 1      : ");
+    Serial.println(PirSensor1MotionDetected);
     Serial.println("/----------------------------------/");
     Serial.println("");
-    Information_PirSensorMotionDetected = PirSensorMotionDetected;
+    Information_PirSensor1MotionDetected = PirSensor1MotionDetected;
+  }
+
+  //------------------- PIR Sensor -------------------//
+  if (PirSensor2MotionDetected != Information_PirSensor2MotionDetected) {
+    Serial.println("/------ PIR Motion Detected -------/");
+    Serial.print("   Motion Sensor 2      : ");
+    Serial.println(PirSensor2MotionDetected);
+    Serial.println("/----------------------------------/");
+    Serial.println("");
+    Information_PirSensor2MotionDetected = PirSensor2MotionDetected;
   }
 
 #endif
