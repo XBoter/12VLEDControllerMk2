@@ -195,13 +195,13 @@ void callback(char* topic, byte * payload, unsigned int length) {
   if (LED_STRIP_COUNT >= 1) {
     //------------------- Parameter [mqtt_LED_Active] -------------------//
     if (String(mqtt_command_LED_Active).equals(topic)) {
-      mqtt_Client.publish(mqtt_state_LED_Active, message, true);
+      mqtt_Client.publish(mqtt_state_LED_Active, message);
       mqtt_LED_Active_1 = atoi(message);
     }
 
     //------------------- Parameter [mqtt_LED_Red,mqtt_LED_Green,mqtt_LED_Blue] -------------------//
     if (String(mqtt_command_LED_Color).equals(topic)) {
-      mqtt_Client.publish(mqtt_state_LED_Color, message, true);
+      mqtt_Client.publish(mqtt_state_LED_Color, message);
       mqtt_LED_Red_1    = atoi(strtok(message, ","));
       mqtt_LED_Green_1  = atoi(strtok(NULL, ","));
       mqtt_LED_Blue_1   = atoi(strtok(NULL, ","));
@@ -209,7 +209,7 @@ void callback(char* topic, byte * payload, unsigned int length) {
 
     //------------------- Parameter [mqtt_LED_Brightness] -------------------//
     if (String(mqtt_command_LED_Brightness).equals(topic)) {
-      mqtt_Client.publish(mqtt_state_LED_Brightness, message, true);
+      mqtt_Client.publish(mqtt_state_LED_Brightness, message);
       mqtt_LED_Brightness_1 = atoi(message);
     }
   }
@@ -217,13 +217,13 @@ void callback(char* topic, byte * payload, unsigned int length) {
   if (LED_STRIP_COUNT >= 2) {
     //------------------- Parameter [mqtt_LED_Active_2] -------------------//
     if (String(mqtt_command_LED_Active_2).equals(topic)) {
-      mqtt_Client.publish(mqtt_state_LED_Active_2, message, true);
+      mqtt_Client.publish(mqtt_state_LED_Active_2, message);
       mqtt_LED_Active_2 = atoi(message);
     }
 
     //------------------- Parameter [mqtt_LED_Red_2,mqtt_LED_Green_2,mqtt_LED_Blue_2] -------------------//
     if (String(mqtt_command_LED_Color_2).equals(topic)) {
-      mqtt_Client.publish(mqtt_state_LED_Color_2, message, true);
+      mqtt_Client.publish(mqtt_state_LED_Color_2, message);
       mqtt_LED_Red_2    = atoi(strtok(message, ","));
       mqtt_LED_Green_2  = atoi(strtok(NULL, ","));
       mqtt_LED_Blue_2   = atoi(strtok(NULL, ","));
@@ -231,7 +231,7 @@ void callback(char* topic, byte * payload, unsigned int length) {
 
     //------------------- Parameter [mqtt_LED_Brightness_2] -------------------//
     if (String(mqtt_command_LED_Brightness_2).equals(topic)) {
-      mqtt_Client.publish(mqtt_state_LED_Brightness_2, message, true);
+      mqtt_Client.publish(mqtt_state_LED_Brightness_2, message);
       mqtt_LED_Brightness_2 = atoi(message);
     }
   }

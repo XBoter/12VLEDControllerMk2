@@ -19,8 +19,13 @@ void ReadDHTSensorData() {
       sprintf(HumidityData, "%ld", Humidity);
       sprintf(TemperatureData, "%ld", Temperature);
 
-      mqtt_Client.publish(mqtt_value_sensor_humidity, HumidityData);
-      mqtt_Client.publish(mqtt_value_sensor_temp, TemperatureData);
+      if ((!isnan(Humidity)) and !(Humidity < 0) and !(Humidity > 100)) {
+        mqtt_Client.publish(mqtt_value_sensor_humidity, HumidityData);
+      }
+
+      if ((!isnan(Temperature)) and !(Temperature < -100) and !(Temperature > 100)) {
+        mqtt_Client.publish(mqtt_value_sensor_temp, TemperatureData);
+      }
 
     }
 

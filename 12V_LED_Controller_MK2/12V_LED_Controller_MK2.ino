@@ -1,9 +1,9 @@
 
 //Config for Functions of the Controller (Prio from Top to Bottom)
 #define LED_STRIP_COUNT 1   //Defines how many LED Strips are Controlled    (Options: 1 and 2)
-#define MOTION_SENSORS 2    //Defines how many Motion Sensors are available (Options: 0, 1 and 2)
+#define MOTION_SENSORS 1    //Defines how many Motion Sensors are available (Options: 0, 1 and 2)
 #define IR_RECIVER 1        //Defines how many IR Receiver are available    (Options: 0 and 1)
-#define DHT_SENSOR 0        //Defines how many DHT Sensors are available    (Options: 0 and 1)
+#define DHT_SENSOR 1        //Defines how many DHT Sensors are available    (Options: 0 and 1)
 
 //+++ Include Libarys +++//
 #include <Arduino.h>
@@ -17,8 +17,8 @@
 
 
 //+++ Secret Header +++//
-#define Controller_Desk
-//#define Controller_Bed
+//#define Controller_Desk
+#define Controller_Bed
 //#define Controller_WardrobeMiddle
 //#define Controller_Shelf
 //#define Controller_TvStand
@@ -45,14 +45,14 @@
 #define Programmer  "Nico Weidenfeller"
 #define Created     "06.06.2019"
 #define LastModifed "23.06.2019"
-#define Version     "0.0.8"
+#define Version     "1.0.1"
 
 /*
   Name          :   12V LED Controller Mk2
   Programmer    :   Nico Weidenfeller
   Created       :   06.06.2019
   Last Modifed  :   23.06.2019
-  Version       :   1.0.0
+  Version       :   1.0.1
   Description   :
 
   ToDoList      :   - Check Pin Configuration for IR, Motion, LED, DHT
@@ -81,6 +81,8 @@
                       improved Information Tab. Added DHT Sensor Read.
                     Version 1.0.0
                       First Finished Versione of the LED Controller MK2. Fixed Bug with the Motion Detection.
+                    Version 1.0.1
+                      Fixed DHT Mqtt publish Error.
 
 */
 
@@ -129,8 +131,8 @@ uint8_t api_SunDown = 0;
 //----------------------------------------------- DHT ---------------------------------------------//
 //*************************************************************************************************//
 DHT dht(PIN_DHT, DHT22);
-float Temperature = 0;
-float Humidity = 0;
+int Temperature = 0;
+int Humidity = 0;
 
 //*************************************************************************************************//
 //----------------------------------------------- IR ----------------------------------------------//

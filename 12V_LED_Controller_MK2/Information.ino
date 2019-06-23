@@ -286,9 +286,11 @@ void printer() {
     if (Information_DHT_DataRead) {
       Serial.println("/---------- DHT New Data ----------/");
       Serial.print("   Temperature          : ");
-      Serial.println(Temperature);
+      Serial.print(Temperature);
+      Serial.println(" ºC");
       Serial.print("   Humidity             : ");
-      Serial.println(Humidity);
+      Serial.print(Humidity);
+      Serial.println(" %");
       Serial.println("/----------------------------------/");
       Serial.println("");
     }
