@@ -3,6 +3,9 @@ void IRControl() {
 
   if (IrRecv.decode(&IrRecvResult)) {
 
+    //For Information Tab
+    Information_IR_DataReceived = true;
+
     //For Brightness MQTT Commands
     char CommandStrip1[4];
     char CommandStrip2[4];
@@ -142,6 +145,8 @@ void IRControl() {
     }
 
     IrRecv.resume();  // Receive the next value
+  } else {
+    Information_IR_DataReceived = false;
   }
 
 }

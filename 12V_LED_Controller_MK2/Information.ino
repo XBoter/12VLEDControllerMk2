@@ -235,28 +235,66 @@ void printer() {
 
 #ifdef DEBUG_MOTION
 
-  //------------------- PIR Sensor -------------------//
-  if (PirSensor1MotionDetected != Information_PirSensor1MotionDetected) {
-    Serial.println("/------ PIR Motion Detected -------/");
-    Serial.print("   Motion Sensor 1      : ");
-    Serial.println(PirSensor1MotionDetected);
-    Serial.println("/----------------------------------/");
-    Serial.println("");
-    Information_PirSensor1MotionDetected = PirSensor1MotionDetected;
+  if (MOTION_SENSORS >= 1 and LED_STRIP_COUNT == 1) {
+    //------------------- PIR Sensor -------------------//
+    if (PirSensor1MotionDetected != Information_PirSensor1MotionDetected) {
+      Serial.println("/------ PIR Motion Detected -------/");
+      Serial.print("   Motion Sensor 1      : ");
+      Serial.println(PirSensor1MotionDetected);
+      Serial.println("/----------------------------------/");
+      Serial.println("");
+      Information_PirSensor1MotionDetected = PirSensor1MotionDetected;
+    }
   }
 
-  //------------------- PIR Sensor -------------------//
-  if (PirSensor2MotionDetected != Information_PirSensor2MotionDetected) {
-    Serial.println("/------ PIR Motion Detected -------/");
-    Serial.print("   Motion Sensor 2      : ");
-    Serial.println(PirSensor2MotionDetected);
-    Serial.println("/----------------------------------/");
-    Serial.println("");
-    Information_PirSensor2MotionDetected = PirSensor2MotionDetected;
+  if (MOTION_SENSORS == 2 and LED_STRIP_COUNT == 1) {
+    //------------------- PIR Sensor -------------------//
+    if (PirSensor2MotionDetected != Information_PirSensor2MotionDetected) {
+      Serial.println("/------ PIR Motion Detected -------/");
+      Serial.print("   Motion Sensor 2      : ");
+      Serial.println(PirSensor2MotionDetected);
+      Serial.println("/----------------------------------/");
+      Serial.println("");
+      Information_PirSensor2MotionDetected = PirSensor2MotionDetected;
+    }
   }
 
 #endif
 
+
+#ifdef DEBUG_IR
+
+  if (IR_RECIVER == 1 and LED_STRIP_COUNT == 1) {
+    //------------------- IR Sensor -------------------//
+    if (Information_IR_DataReceived) {
+      Serial.println("/------ IR Message Received -------/");
+      Serial.print("   Message              : ");
+      serialPrintUint64(IrRecvResult.value, HEX);
+      Serial.println("");
+      Serial.println("/----------------------------------/");
+      Serial.println("");
+    }
+  }
+
+#endif
+
+
+#ifdef DEBUG_DHT
+
+  if (DHT_SENSOR == 1 and LED_STRIP_COUNT == 1) {
+    //------------------- DHT Sensor -------------------//
+    if (Information_DHT_DataRead) {
+      Serial.println("/---------- DHT New Data ----------/");
+      Serial.print("   Temperature          : ");
+      Serial.println(Temperature);
+      Serial.print("   Humidity             : ");
+      Serial.println(Humidity);
+      Serial.println("/----------------------------------/");
+      Serial.println("");
+    }
+  }
+
+#endif
 
 
 }

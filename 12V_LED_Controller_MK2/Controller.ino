@@ -64,7 +64,7 @@ void SetupController() {
   //------------------ DHT Sensor -----------------//
   if (DHT_SENSOR == 1 and MOTION_SENSORS <= 1 and LED_STRIP_COUNT <= 1) {
     Serial.println("DHT Sensor    1: D6");
-    pinMode(PIN_DHT, INPUT);
+    dht.begin();
   }
 
   Serial.println("Finished PIN Initialization");

@@ -12,8 +12,9 @@
 #include <IRremoteESP8266.h>
 #include <IRrecv.h>
 #include <IRutils.h>
-//#include <DHT.h>
-//#include <DHT_U.h>
+#include <Adafruit_Sensor.h>
+#include <DHT.h>
+
 
 //+++ Secret Header +++//
 #define Controller_Desk
@@ -36,6 +37,7 @@
 #define DEBUG_API_DATA
 #define DEBUG_MOTION
 #define DEBUG_IR
+#define DEBUG_DHT
 
 //-------------------- Basic Information --------------------//
 //for Serial print Startup Info
@@ -43,14 +45,14 @@
 #define Programmer  "Nico Weidenfeller"
 #define Created     "06.06.2019"
 #define LastModifed "23.06.2019"
-#define Version     "0.0.6"
+#define Version     "0.0.8"
 
 /*
   Name          :   12V LED Controller Mk2
   Programmer    :   Nico Weidenfeller
   Created       :   06.06.2019
   Last Modifed  :   23.06.2019
-  Version       :   0.0.7
+  Version       :   1.0.0
   Description   :
 
   ToDoList      :   - Check Pin Configuration for IR, Motion, LED, DHT
@@ -71,11 +73,14 @@
                       Added Error Effects and Color Effect Modes.
                     Version 0.0.5
                       Added API support. And Master Present switch. Added Motion Tab
-                    Version 0.0.6 
+                    Version 0.0.6
                       Added Motion Detection and HeartBeat.
                     Version 0.0.7
                       Added IR and fixed bugs.
-                      
+                    Version 0.0.8
+                      improved Information Tab. Added DHT Sensor Read.
+                    Version 1.0.0
+                      First Finished Versione of the LED Controller MK2. Fixed Bug with the Motion Detection.
 
 */
 
@@ -123,12 +128,14 @@ uint8_t api_SunDown = 0;
 //*************************************************************************************************//
 //----------------------------------------------- DHT ---------------------------------------------//
 //*************************************************************************************************//
-
+DHT dht(PIN_DHT, DHT22);
+float Temperature = 0;
+float Humidity = 0;
 
 //*************************************************************************************************//
 //----------------------------------------------- IR ----------------------------------------------//
 //*************************************************************************************************//
-IRrecv IrRecv(PIN_IR); 
+IRrecv IrRecv(PIN_IR);
 decode_results IrRecvResult;
 
 //*************************************************************************************************//
@@ -270,6 +277,10 @@ uint8_t Information_api_SunDown             = 0;
 uint8_t Information_PirSensor1MotionDetected = 0;
 uint8_t Information_PirSensor2MotionDetected = 0;
 
+uint8_t Information_IR_DataReceived         = 0;
+
+uint8_t Information_DHT_DataRead            = 0;
+
 //*************************************************************************************************//
 //---------------------------------------------- Delay --------------------------------------------//
 //*************************************************************************************************//
@@ -294,6 +305,7 @@ unsigned long PrevMillis_ApiTimeUpdateRate           = 0;
 unsigned long PrevMillis_ApiSunUpdateRate            = 0;
 unsigned long PrevMillis_MotionDetected              = 0;
 unsigned long PrevMillis_HeartBeat                   = 0;
+unsigned long PrevMillis_ReatDHTSensorData           = 0;
 
 
 unsigned long TimeOut_Example                  = 1000;   // 1.00 Seconds
@@ -303,6 +315,7 @@ unsigned long TimeOut_EffectWeekendMode        = 100;    // 0.10 Seconds
 unsigned long TimeOut_EffectForceMode          = 60000;  // 1.00 Minute
 unsigned long TimeOut_ApiUpdateRate            = 60000;  // 1.00 Minute
 unsigned long TimeOut_HeartBeat                = 300000; // 5.00 Minute
+unsigned long TimeOut_ReatDHTSensorData        = 60000;  // 1.00 Minute
 
 /*
   unsigned long CurMillis_Example = millis();
