@@ -76,6 +76,8 @@ void SetupController() {
 
 void LoopController() {
 
+  mqtt_Client.loop();
+
   //-- WiFi --//
   if (WiFi.status() != WL_CONNECTED) {
     wifi();
@@ -85,7 +87,6 @@ void LoopController() {
   if ((WiFi.status() == WL_CONNECTED) and !mqtt_Client.connected()) {
     mqtt();
   }
-  mqtt_Client.loop();
 
   //-- API --//
   if ((WiFi.status() == WL_CONNECTED) and mqtt_Client.connected() and !http_Client.connected()) {
@@ -115,28 +116,31 @@ void LoopController() {
   //-------------- Error State Controll for Network  -----------------//
 
   //#### WiFi ####//
-  if ((WiFi.status() != WL_CONNECTED) and NoWiFiError) {
+  /*
+    if ((WiFi.status() != WL_CONNECTED) and NoWiFiError) {
     LastMainState = MainState;
     MainState = 777;
     NoWiFiError = false;
-  } else {
+    } else {
     if ((WiFi.status() == WL_CONNECTED) and !NoWiFiError) {
       MainState = LastMainState;
       NoWiFiError = true;
     }
-  }
-
-  //#### MQTT ####//
-  if ((WiFi.status() == WL_CONNECTED) and (!mqtt_Client.connected()) and NoMqttError) {
-    LastMainState = MainState;
-    MainState = 888;
-    NoMqttError = false;
-  } else {
-    if ((WiFi.status() == WL_CONNECTED) and (mqtt_Client.connected()) and !NoMqttError) {
-      MainState = LastMainState;
-      NoMqttError = true;
     }
-  }
+  */
+  /*
+    //#### MQTT ####//
+    if ((WiFi.status() == WL_CONNECTED) and (!mqtt_Client.connected()) and NoMqttError) {
+      LastMainState = MainState;
+      MainState = 888;
+      NoMqttError = false;
+    } else {
+      if ((WiFi.status() == WL_CONNECTED) and (mqtt_Client.connected()) and !NoMqttError) {
+        MainState = LastMainState;
+        NoMqttError = true;
+      }
+    }
+  */
 
   //#### API ####//
   /* Cant be used because after sucessfull API call the connections is closed
@@ -184,24 +188,47 @@ void LoopController() {
           if (mqtt_LED_Active_1) {
             NormalLight(1);
           } else {
-            if (MotionOccured) {
-              SetColorTo(1, MotionColorRed, MotionColorGreen, MotionColorBlue);
-              FadeBrightnessTo(1, MotionBrightness);
+
+#ifdef secret_define_disable_Motion_when_pc_is_on
+            if (!mqtt_Global_MasterPCPresent) {
+#endif
+
+              if (MotionOccured) {
+                SetColorTo(1, MotionColorRed, MotionColorGreen, MotionColorBlue);
+                FadeBrightnessTo(1, MotionBrightness);
+              } else {
+                FadeBrightnessTo(1, 0);
+              }
+
+#ifdef secret_define_disable_Motion_when_pc_is_on
             } else {
               FadeBrightnessTo(1, 0);
             }
+#endif
           }
 
           //---- Strip 2 ----//
           if (mqtt_LED_Active_2) {
             NormalLight(2);
           } else {
-            if (MotionOccured) {
-              SetColorTo(2, MotionColorRed, MotionColorGreen, MotionColorBlue);
-              FadeBrightnessTo(2, MotionBrightness);
+
+#ifdef secret_define_disable_Motion_when_pc_is_on
+            if (!mqtt_Global_MasterPCPresent) {
+#endif
+
+              if (MotionOccured) {
+                SetColorTo(2, MotionColorRed, MotionColorGreen, MotionColorBlue);
+                FadeBrightnessTo(2, MotionBrightness);
+              } else {
+                FadeBrightnessTo(2, 0);
+              }
+
+#ifdef secret_define_disable_Motion_when_pc_is_on
             } else {
-              FadeBrightnessTo(2, 0);
+              FadeBrightnessTo(1, 0);
             }
+#endif
+
           }
 
         }

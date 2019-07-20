@@ -1,8 +1,8 @@
 
 //Config for Functions of the Controller (Prio from Top to Bottom)
 #define LED_STRIP_COUNT 1   //Defines how many LED Strips are Controlled    (Options: 1 and 2)
-#define MOTION_SENSORS 1    //Defines how many Motion Sensors are available (Options: 0, 1 and 2)
-#define IR_RECIVER 1        //Defines how many IR Receiver are available    (Options: 0 and 1)
+#define MOTION_SENSORS 1     //Defines how many Motion Sensors are available (Options: 0, 1 and 2)
+#define IR_RECIVER 0        //Defines how many IR Receiver are available    (Options: 0 and 1)
 #define DHT_SENSOR 1        //Defines how many DHT Sensors are available    (Options: 0 and 1)
 
 //+++ Include Libarys +++//
@@ -44,15 +44,15 @@
 #define Name        "12V LED Controller Mk2"
 #define Programmer  "Nico Weidenfeller"
 #define Created     "06.06.2019"
-#define LastModifed "23.06.2019"
-#define Version     "1.0.1"
+#define LastModifed "20.07.2019"
+#define Version     "1.0.3"
 
 /*
   Name          :   12V LED Controller Mk2
   Programmer    :   Nico Weidenfeller
   Created       :   06.06.2019
-  Last Modifed  :   23.06.2019
-  Version       :   1.0.1
+  Last Modifed  :   20.07.2019
+  Version       :   1.0.3
   Description   :
 
   ToDoList      :   - Check Pin Configuration for IR, Motion, LED, DHT
@@ -83,23 +83,32 @@
                       First Finished Versione of the LED Controller MK2. Fixed Bug with the Motion Detection.
                     Version 1.0.1
                       Fixed DHT Mqtt publish Error.
+                    Version 1.0.2
+                      Deactivatet Error Effects
+                    Version 1.0.3
+                      Motion Detection is deativatet if the PC is on. Can be set in the secret file
 
 */
 
 //Pin Defines for Out / Inputs
 //PINs D1, D2, D3
-#define PIN_LED_STRIP_1_RED D3
-#define PIN_LED_STRIP_1_GREEN D2
+#define PIN_LED_STRIP_1_RED D2
+#define PIN_LED_STRIP_1_GREEN D3
 #define PIN_LED_STRIP_1_BLUE D1
 
 //PINs D5, D6, D7
-#define PIN_LED_STRIP_2_RED D7
-#define PIN_LED_STRIP_2_GREEN D6
+#define PIN_LED_STRIP_2_RED D6
+#define PIN_LED_STRIP_2_GREEN D7
 #define PIN_LED_STRIP_2_BLUE D5
 #define PIN_IR D5
 #define PIN_DHT D6
 #define PIN_MOTION_SENSOR_2 D6
 #define PIN_MOTION_SENSOR_1 D7
+
+//*************************************************************************************************//
+//---------------------------------------------- TEST ---------------------------------------------//
+//*************************************************************************************************//
+uint16_t MqttConnectCounter = 0;
 
 //*************************************************************************************************//
 //--------------------------------------------- SHARED --------------------------------------------//
@@ -226,6 +235,7 @@ uint8_t mqtt_Global_Force                = 0;
 uint8_t mqtt_Global_GoodNight            = 0;
 uint8_t mqtt_Global_Motion_Active        = 0;
 uint8_t mqtt_Global_MasterPresent        = 0;
+uint8_t mqtt_Global_MasterPCPresent      = 0;
 
 //# Specific #//
 //---- LED ----//
@@ -258,6 +268,7 @@ uint8_t Information_mqtt_Global_Force                = 0;
 uint8_t Information_mqtt_Global_GoodNight            = 0;
 uint8_t Information_mqtt_Global_Motion_Active        = 0;
 uint8_t Information_mqtt_Global_MasterPresent        = 0;
+uint8_t Information_mqtt_Global_MasterPCPresent      = 0;
 
 uint8_t Information_mqtt_LED_Active_1       = 0;
 uint8_t Information_mqtt_LED_Red_1          = 0;

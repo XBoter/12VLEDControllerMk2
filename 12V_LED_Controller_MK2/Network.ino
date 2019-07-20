@@ -56,6 +56,7 @@ void mqtt() {
       //Global
       //-- Master --//
       mqtt_Client.subscribe( mqtt_command_Global_Master_Present );
+      mqtt_Client.subscribe( mqtt_command_Global_Master_PC_Present );
 
       //-- Parameter --//
       mqtt_Client.subscribe( mqtt_value_Global_Color_Fadespeed );
@@ -88,6 +89,11 @@ void mqtt() {
       }
 
       Serial.println("Finished channel subscription");
+
+      MqttConnectCounter++;
+      Serial.print("MQTT Reconnect Count : ");
+      Serial.println(MqttConnectCounter);
+      Serial.println("");
     }
   }
 
@@ -111,6 +117,15 @@ void callback(char* topic, byte * payload, unsigned int length) {
       mqtt_Global_MasterPresent = 1;
     } else {
       mqtt_Global_MasterPresent = 0;
+    }
+  }
+
+  //------------------- Parameter [mqtt_Global_MasterPCPresent] -------------------//
+  if (String(mqtt_command_Global_Master_PC_Present).equals(topic)) {
+    if (strcmp(message, "on") == 0) {
+      mqtt_Global_MasterPCPresent = 1;
+    } else {
+      mqtt_Global_MasterPCPresent = 0;
     }
   }
 

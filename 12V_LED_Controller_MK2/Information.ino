@@ -68,6 +68,16 @@ void printer() {
     Information_mqtt_Global_MasterPresent = mqtt_Global_MasterPresent;
   }
 
+  //------------------- Parameter [mqtt_Global_MasterPCPresent] -------------------//
+  if (mqtt_Global_MasterPCPresent != Information_mqtt_Global_MasterPCPresent) {
+    Serial.println("/----- MQTT Parameter Change ------/");
+    Serial.print("   Master PC Present    : ");
+    Serial.println(mqtt_Global_MasterPCPresent);
+    Serial.println("/----------------------------------/");
+    Serial.println("");
+    Information_mqtt_Global_MasterPCPresent = mqtt_Global_MasterPCPresent;
+  }
+
   //------------------- Parameter [mqtt_Global_Color_Fadespeed] -------------------//
   if (mqtt_Global_Color_Fadespeed != Information_mqtt_Global_Color_Fadespeed) {
     Serial.println("/----- MQTT Parameter Change ------/");
