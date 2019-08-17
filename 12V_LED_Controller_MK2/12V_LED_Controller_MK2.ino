@@ -3,7 +3,7 @@
 #define LED_STRIP_COUNT 1   //Defines how many LED Strips are Controlled    (Options: 1 and 2)
 #define MOTION_SENSORS 1     //Defines how many Motion Sensors are available (Options: 0, 1 and 2)
 #define IR_RECIVER 0        //Defines how many IR Receiver are available    (Options: 0 and 1)
-#define DHT_SENSOR 1        //Defines how many DHT Sensors are available    (Options: 0 and 1)
+#define DHT_SENSOR 0        //Defines how many DHT Sensors are available    (Options: 0 and 1)
 
 //+++ Include Libarys +++//
 #include <Arduino.h>
@@ -18,9 +18,10 @@
 
 //+++ Secret Header +++//
 //#define Controller_Desk
-#define Controller_Bed
+//#define Controller_Bed
 //#define Controller_WardrobeMiddle
 //#define Controller_Shelf
+#define Controller_Shelf_Down
 //#define Controller_TvStand
 //#define Controller_Kitchen
 //#define Controller_Bath
