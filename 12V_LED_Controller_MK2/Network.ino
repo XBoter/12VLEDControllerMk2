@@ -53,7 +53,10 @@ void mqtt() {
     if (mqtt_Client.connect(mqtt_client_name, mqtt_username, mqtt_password)) {
       Serial.println("Start channel subscription");
 
-      //Global
+      //*** System ***//
+      mqtt_Client.subscribe( mqtt_command_System_Reboot );
+
+      //*** Global ***//
       //-- Master --//
       mqtt_Client.subscribe( mqtt_command_Global_Master_Present );
       mqtt_Client.subscribe( mqtt_command_Global_Master_PC_Present );
@@ -61,7 +64,8 @@ void mqtt() {
       //-- Parameter --//
       mqtt_Client.subscribe( mqtt_value_Global_Color_Fadespeed );
       mqtt_Client.subscribe( mqtt_value_Global_Brightness_Fadespeed );
-      mqtt_Client.subscribe( mqtt_value_Global_Good_Night_Mode );
+      mqtt_Client.subscribe( mqtt_value_Global_Good_Night_Timeout );
+      mqtt_Client.subscribe( mqtt_value_Global_Good_Morning_Timeout );
       mqtt_Client.subscribe( mqtt_command_Global_Motion_Active );
 
       //-- Modes --//
@@ -69,6 +73,7 @@ void mqtt() {
       mqtt_Client.subscribe( mqtt_command_Global_Weekend );
       mqtt_Client.subscribe( mqtt_command_Global_Force );
       mqtt_Client.subscribe( mqtt_command_Global_GoodNight );
+      mqtt_Client.subscribe( mqtt_command_Global_GoodMorning );
 
       //Controller Specific
       //-- LED --//
@@ -109,6 +114,17 @@ void callback(char* topic, byte * payload, unsigned int length) {
   }
   message[length] = '\0';
 
+  //######################################## System ########################################//
+
+  //------------------- Parameter [mqtt_System_Reboot] -------------------//
+  if (String(mqtt_command_System_Reboot).equals(topic)) {
+    uint8_t temp = atoi(message);
+    if (temp == 1) {
+      mqtt_System_Reboot = true;
+    }
+    PrevMillis_SystemRebootDelay = millis();
+  }
+
   //######################################## Global ########################################//
 
   //------------------- Parameter [mqtt_Global_MasterPresent] -------------------//
@@ -140,8 +156,13 @@ void callback(char* topic, byte * payload, unsigned int length) {
   }
 
   //------------------- Parameter [mqtt_Global_Good_Night_Timeout] -------------------//
-  if (String(mqtt_value_Global_Good_Night_Mode).equals(topic)) {
+  if (String(mqtt_value_Global_Good_Night_Timeout).equals(topic)) {
     mqtt_Global_Good_Night_Timeout = atoi(message);
+  }
+
+  //------------------- Parameter [mqtt_Global_Good_Morning_Timeout] -------------------//
+  if (String(mqtt_value_Global_Good_Morning_Timeout).equals(topic)) {
+    mqtt_Global_Good_Morning_Timeout = atoi(message);
   }
 
   //------------------- Parameter [mqtt_Global_Motion_Active] -------------------//
@@ -155,11 +176,11 @@ void callback(char* topic, byte * payload, unsigned int length) {
     mqtt_Global_Party             = atoi(message);
     mqtt_Global_Weekend           = 0;
     mqtt_Global_Force             = 0;
-    mqtt_Global_GoodNight         = 0;
+#ifdef secret_define_desk_master_controller
     mqtt_Client.publish(mqtt_state_Global_Party, message);
     mqtt_Client.publish(mqtt_state_Global_Weekend, "0");
     mqtt_Client.publish(mqtt_state_Global_Force, "0");
-    mqtt_Client.publish(mqtt_state_Global_GoodNight, "0");
+#endif
   }
 
   //------------------- Parameter [mqtt_Global_Weekend] -------------------//
@@ -167,11 +188,13 @@ void callback(char* topic, byte * payload, unsigned int length) {
     mqtt_Global_Party             = 0;
     mqtt_Global_Weekend           = atoi(message);
     mqtt_Global_Force             = 0;
-    mqtt_Global_GoodNight         = 0;
+#ifdef secret_define_desk_master_controller
     mqtt_Client.publish(mqtt_state_Global_Party, "0");
     mqtt_Client.publish(mqtt_state_Global_Weekend, message);
     mqtt_Client.publish(mqtt_state_Global_Force, "0");
-    mqtt_Client.publish(mqtt_state_Global_GoodNight, "0");
+#endif
+    //Reset Weekend
+    PreStateWeekend = 0;
   }
 
   //------------------- Parameter [mqtt_Global_Force] -------------------//
@@ -179,30 +202,42 @@ void callback(char* topic, byte * payload, unsigned int length) {
     mqtt_Global_Party             = 0;
     mqtt_Global_Weekend           = 0;
     mqtt_Global_Force             = atoi(message);
-    mqtt_Global_GoodNight         = 0;
+#ifdef secret_define_desk_master_controller
     mqtt_Client.publish(mqtt_state_Global_Party, "0");
     mqtt_Client.publish(mqtt_state_Global_Weekend, "0");
     mqtt_Client.publish(mqtt_state_Global_Force, message);
-    mqtt_Client.publish(mqtt_state_Global_GoodNight, "0");
-
+#endif
     //Generate Start Color
     StateForce = (int)(random(0, 2)) * 20;
   }
 
   //------------------- Parameter [mqtt_Global_GoodNight] -------------------//
   if (String(mqtt_command_Global_GoodNight).equals(topic)) {
-    mqtt_Global_Party             = 0;
-    mqtt_Global_Weekend           = 0;
-    mqtt_Global_Force             = 0;
-    mqtt_Global_GoodNight         = atoi(message);
-    mqtt_Client.publish(mqtt_state_Global_Party, "0");
-    mqtt_Client.publish(mqtt_state_Global_Weekend, "0");
-    mqtt_Client.publish(mqtt_state_Global_Force, "0");
-    mqtt_Client.publish(mqtt_state_Global_GoodNight, message);
+    uint8_t positiv = atoi(message);
+    if (positiv) {
+      if (StateGoodNight == 0) {
+        if (mqtt_LED_Active_1 or mqtt_LED_Active_2) {
+          mqtt_Global_GoodNight = true;
+        } else {
+          mqtt_Global_GoodNight = false;
+        }
+      }
+    }
+  }
 
-    //Reset GoodNight Mode
-    StateGoodNight = 0;
-    PrevMillis_EffectGoodNightMode = millis();
+  //------------------- Parameter [mqtt_Global_GoodMorning] -------------------//
+  if (String(mqtt_command_Global_GoodMorning).equals(topic)) {
+    uint8_t positiv = atoi(message);
+    if (positiv) {
+      if (StateGoodMorning == 0) {
+        if (!mqtt_LED_Active_1 and !mqtt_LED_Active_2) {
+          mqtt_Global_GoodMorning = true;
+          PrevMillis_GoodMorningMode = millis();
+        } else {
+          mqtt_Global_GoodMorning = false;
+        }
+      }
+    }
   }
 
   //######################################## Specific ########################################//
@@ -212,6 +247,8 @@ void callback(char* topic, byte * payload, unsigned int length) {
     if (String(mqtt_command_LED_Active).equals(topic)) {
       mqtt_Client.publish(mqtt_state_LED_Active, message);
       mqtt_LED_Active_1 = atoi(message);
+      mqtt_Global_GoodMorning = false;
+      mqtt_Global_GoodNight = false;
     }
 
     //------------------- Parameter [mqtt_LED_Red,mqtt_LED_Green,mqtt_LED_Blue] -------------------//
@@ -234,6 +271,8 @@ void callback(char* topic, byte * payload, unsigned int length) {
     if (String(mqtt_command_LED_Active_2).equals(topic)) {
       mqtt_Client.publish(mqtt_state_LED_Active_2, message);
       mqtt_LED_Active_2 = atoi(message);
+      mqtt_Global_GoodMorning = false;
+      mqtt_Global_GoodNight = false;
     }
 
     //------------------- Parameter [mqtt_LED_Red_2,mqtt_LED_Green_2,mqtt_LED_Blue_2] -------------------//

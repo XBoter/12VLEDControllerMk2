@@ -69,6 +69,18 @@ void SetupController() {
 
   Serial.println("Finished PIN Initialization");
 
+  Serial.println("Set Modes");
+
+#ifdef secret_define_disable_Motion_when_pc_is_on
+  MotionEnabled = false;
+#endif
+
+#ifdef secret_define_enable_GoodMorning_Mode
+  GoodMorningModeEnabled = true;
+#endif
+
+  Serial.println("Finished Set Modes");
+
   Serial.println("Finished Setup");
   Serial.println("");
 }
@@ -181,76 +193,83 @@ void LoopController() {
       //Run Mode
       case 100:
 
-        //---- Normal Light Mode Strip 1 ----//
-        if (!mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
+        if (!mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force) {
 
           //---- Strip 1 ----//
           if (mqtt_LED_Active_1) {
-            NormalLight(1);
+            //Good Night Mode Check
+            if (mqtt_Global_GoodNight) {
+              GoodNightMode();
+            } else {
+              NormalLight(1);
+            }
+
           } else {
 
-#ifdef secret_define_disable_Motion_when_pc_is_on
-            if (!mqtt_Global_MasterPCPresent) {
-#endif
+            if (mqtt_Global_GoodMorning and GoodMorningModeEnabled) {
+              GoodMorningMode();
+            } else {
 
-              if (MotionOccured) {
-                SetColorTo(1, MotionColorRed, MotionColorGreen, MotionColorBlue);
-                FadeBrightnessTo(1, MotionBrightness);
+              if (!mqtt_Global_MasterPCPresent or MotionEnabled) {
+
+                if (MotionOccured) {
+                  SetColorTo(1, MotionColorRed, MotionColorGreen, MotionColorBlue);
+                  FadeBrightnessTo(1, MotionBrightness);
+                } else {
+                  FadeBrightnessTo(1, 0);
+                }
+
               } else {
                 FadeBrightnessTo(1, 0);
               }
 
-#ifdef secret_define_disable_Motion_when_pc_is_on
-            } else {
-              FadeBrightnessTo(1, 0);
             }
-#endif
           }
 
           //---- Strip 2 ----//
           if (mqtt_LED_Active_2) {
-            NormalLight(2);
+            if (mqtt_Global_GoodNight) {
+              GoodNightMode();
+            } else {
+              NormalLight(2);
+            }
+
           } else {
 
-#ifdef secret_define_disable_Motion_when_pc_is_on
-            if (!mqtt_Global_MasterPCPresent) {
-#endif
+            if (mqtt_Global_GoodMorning and GoodMorningModeEnabled) {
+              GoodMorningMode();
+            } else {
 
-              if (MotionOccured) {
-                SetColorTo(2, MotionColorRed, MotionColorGreen, MotionColorBlue);
-                FadeBrightnessTo(2, MotionBrightness);
+              if (!mqtt_Global_MasterPCPresent or MotionEnabled) {
+
+                if (MotionOccured) {
+                  SetColorTo(2, MotionColorRed, MotionColorGreen, MotionColorBlue);
+                  FadeBrightnessTo(2, MotionBrightness);
+                } else {
+                  FadeBrightnessTo(2, 0);
+                }
+
               } else {
                 FadeBrightnessTo(2, 0);
               }
-
-#ifdef secret_define_disable_Motion_when_pc_is_on
-            } else {
-              FadeBrightnessTo(1, 0);
             }
-#endif
-
           }
 
         }
 
         //---- Party Light Mode Strip 1 and 2 ----//
-        if (mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
+        if (mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force) {
           PartyLight();
         }
 
         //---- Weekend Light Mode Strip 1 and 2 ----//
-        if (!mqtt_Global_Party and mqtt_Global_Weekend and !mqtt_Global_Force and !mqtt_Global_GoodNight) {
+        if (!mqtt_Global_Party and mqtt_Global_Weekend and !mqtt_Global_Force) {
           WeekendLight();
         }
 
         //---- Force Light Mode Strip 1 and 2 ----//
-        if (!mqtt_Global_Party and !mqtt_Global_Weekend and mqtt_Global_Force and !mqtt_Global_GoodNight) {
+        if (!mqtt_Global_Party and !mqtt_Global_Weekend and mqtt_Global_Force) {
           ForceLight();
-        }
-
-        //---- Good Night Light Mode Strip 1 and 2 ----//
-        if (!mqtt_Global_Party and !mqtt_Global_Weekend and !mqtt_Global_Force and mqtt_Global_GoodNight) {
-          GoodNightLight();
         }
 
         break;
@@ -285,6 +304,16 @@ void LoopController() {
   } else {
     FadeBrightnessTo(1, 0);
     FadeBrightnessTo(2, 0);
+  }
+
+  //System Reboot
+  if (mqtt_System_Reboot) {
+    unsigned long CurMillis_SystemRebootDelay = millis();
+    if (CurMillis_SystemRebootDelay - PrevMillis_SystemRebootDelay >= TimeOut_SystemRebootDelay) {
+      PrevMillis_SystemRebootDelay = CurMillis_SystemRebootDelay;
+      Serial.println("#!# REBOOTING #!#");
+      ESP.restart();
+    }
   }
 
 }

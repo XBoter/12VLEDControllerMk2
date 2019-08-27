@@ -2,6 +2,15 @@
 //Prints Information about the Programm to the Serial Terminal
 void printer() {
 
+  if (Information_mqtt_System_Reboot != mqtt_System_Reboot) {
+    Serial.println("/--------- System Change ----------/");
+    Serial.print("   System Reboot     : ");
+    Serial.println(mqtt_System_Reboot);
+    Serial.println("/----------------------------------/");
+    Serial.println("");
+    Information_mqtt_System_Reboot = mqtt_System_Reboot;
+  }
+
 #ifdef DEBUG_MAIN_STATE
 
   if (Information_MainState != MainState) {
@@ -34,7 +43,7 @@ void printer() {
 
   if ((Information_api_TimeHour != api_TimeHour) or (Information_api_TimeMinute != api_TimeMinute)) {
     Serial.println("/-------- API Data Change ---------/");
-    Serial.print("   Time              : ");
+    Serial.print("   Time                 : ");
     Serial.print(api_TimeHour);
     Serial.print(":");
     Serial.println(api_TimeMinute);
@@ -46,7 +55,7 @@ void printer() {
 
   if (Information_api_SunDown != api_SunDown) {
     Serial.println("/-------- API Data Change ---------/");
-    Serial.print("   Sun Down          : ");
+    Serial.print("   Sun Down             : ");
     Serial.println(api_SunDown);
     Serial.println("/----------------------------------/");
     Serial.println("");
@@ -108,6 +117,16 @@ void printer() {
     Information_mqtt_Global_Good_Night_Timeout = mqtt_Global_Good_Night_Timeout;
   }
 
+  //------------------- Parameter [mqtt_Global_Good_Morning_Timeout] -------------------//
+  if (mqtt_Global_Good_Morning_Timeout != Information_mqtt_Global_Good_Morning_Timeout) {
+    Serial.println("/----- MQTT Parameter Change ------/");
+    Serial.print("   Good Morning Timeout : ");
+    Serial.println(mqtt_Global_Good_Morning_Timeout);
+    Serial.println("/----------------------------------/");
+    Serial.println("");
+    Information_mqtt_Global_Good_Morning_Timeout = mqtt_Global_Good_Morning_Timeout;
+  }
+
   //------------------- Parameter [mqtt_Global_Party] -------------------//
   if (mqtt_Global_Party != Information_mqtt_Global_Party) {
     Serial.println("/----- MQTT Parameter Change ------/");
@@ -146,6 +165,16 @@ void printer() {
     Serial.println("/----------------------------------/");
     Serial.println("");
     Information_mqtt_Global_GoodNight = mqtt_Global_GoodNight;
+  }
+
+  //------------------- Parameter [mqtt_Global_GoodMorning] -------------------//
+  if (mqtt_Global_GoodMorning != Information_mqtt_Global_GoodMorning) {
+    Serial.println("/----- MQTT Parameter Change ------/");
+    Serial.print("   Good Morning         : ");
+    Serial.println(mqtt_Global_GoodMorning);
+    Serial.println("/----------------------------------/");
+    Serial.println("");
+    Information_mqtt_Global_GoodMorning = mqtt_Global_GoodMorning;
   }
 
   //------------------- Parameter [mqtt_LED_Active] -------------------//

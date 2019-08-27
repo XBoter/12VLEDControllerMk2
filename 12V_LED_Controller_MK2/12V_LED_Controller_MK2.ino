@@ -3,7 +3,7 @@
 #define LED_STRIP_COUNT 1   //Defines how many LED Strips are Controlled    (Options: 1 and 2)
 #define MOTION_SENSORS 1     //Defines how many Motion Sensors are available (Options: 0, 1 and 2)
 #define IR_RECIVER 0        //Defines how many IR Receiver are available    (Options: 0 and 1)
-#define DHT_SENSOR 0        //Defines how many DHT Sensors are available    (Options: 0 and 1)
+#define DHT_SENSOR 1        //Defines how many DHT Sensors are available    (Options: 0 and 1)
 
 //+++ Include Libarys +++//
 #include <Arduino.h>
@@ -15,15 +15,14 @@
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 
-
 //+++ Secret Header +++//
 //#define Controller_Desk
 //#define Controller_Bed
 //#define Controller_WardrobeMiddle
 //#define Controller_Shelf
-#define Controller_Shelf_Down
+//#define Controller_Shelf_Down
 //#define Controller_TvStand
-//#define Controller_Kitchen
+#define Controller_Kitchen
 //#define Controller_Bath
 
 //Used for New Network Parameter
@@ -45,20 +44,18 @@
 #define Name        "12V LED Controller Mk2"
 #define Programmer  "Nico Weidenfeller"
 #define Created     "06.06.2019"
-#define LastModifed "20.07.2019"
-#define Version     "1.0.3"
+#define LastModifed "27.08.2019"
+#define Version     "1.1.1"
 
 /*
   Name          :   12V LED Controller Mk2
   Programmer    :   Nico Weidenfeller
   Created       :   06.06.2019
-  Last Modifed  :   20.07.2019
-  Version       :   1.0.3
+  Last Modifed  :   27.08.2019
+  Version       :   1.1.1
   Description   :
 
-  ToDoList      :   - Check Pin Configuration for IR, Motion, LED, DHT
-                    - Add Error Mode for No API Connection if API is used
-                    - Add Retain Flag to mqtt.publish !!!! But not by Global Paths !!!!
+  ToDoList      :   -
 
   Bugs          :   -
 
@@ -88,6 +85,10 @@
                       Deactivatet Error Effects
                     Version 1.0.3
                       Motion Detection is deativatet if the PC is on. Can be set in the secret file
+                    Version 1.1.0
+                      Fixed Good Night Mode. And added Good Morning Mode. Tuned Weekend Effect Mode. Changed Party Effect Mode. Fixed Bug with LED Modes (Desk Controller is the new Master Controller for Effect Mode control).
+                    Version 1.1.1
+                      Added System Reboot Option over Mqtt to Reset System.
 
 */
 
@@ -112,9 +113,10 @@
 uint16_t MqttConnectCounter = 0;
 
 //*************************************************************************************************//
-//--------------------------------------------- SHARED --------------------------------------------//
+//--------------------------------------------- Modes ---------------------------------------------//
 //*************************************************************************************************//
-
+boolean MotionEnabled = true;
+boolean GoodMorningModeEnabled = false;
 
 //*************************************************************************************************//
 //------------------------------------------- Controller ------------------------------------------//
@@ -174,6 +176,7 @@ uint8_t PartyColorGreenStrip2 = 0;
 uint8_t PartyColorBlueStrip2  = 0;
 
 //---- Weekend ----//
+uint8_t PreStateWeekend = 0;
 uint8_t StateWeekend = 0;
 uint8_t WeekendColorRed = 255;
 uint8_t WeekendColorGreen = 0;
@@ -184,6 +187,15 @@ uint8_t StateForce = 0;
 
 //---- Good Night ----//
 uint8_t StateGoodNight = 0;
+uint8_t StartBrightnessStrip1GoodNight = 0;
+uint8_t StartBrightnessStrip2GoodNight = 0;
+uint8_t WaitFadeStrip1GoodNight = 0;
+uint8_t WaitFadeStrip2GoodNight = 0;
+
+//---- Good Morning ----//
+uint8_t StateGoodMorning = 0;
+uint8_t WaitFadeStrip1GoodMorning = 0;
+uint8_t WaitFadeStrip2GoodMorning = 0;
 
 //---- Error_NoWiFiConnection ----//
 uint8_t BrightnessErrorNoWiFiConnection = 80;
@@ -226,17 +238,22 @@ uint16_t HeartBeatCounter = 0;
 
 //---- Parameter List ----//
 
+//# System #//
+uint8_t mqtt_System_Reboot = false;
+
 //# Global #//
-uint8_t mqtt_Global_Color_Fadespeed      = 20; //Needs Init for Startup with WiFi and MQTT Effect
-uint8_t mqtt_Global_Brightness_Fadespeed = 20; //""
-uint16_t mqtt_Global_Good_Night_Timeout  = 0;
-uint8_t mqtt_Global_Party                = 0;
-uint8_t mqtt_Global_Weekend              = 0;
-uint8_t mqtt_Global_Force                = 0;
-uint8_t mqtt_Global_GoodNight            = 0;
-uint8_t mqtt_Global_Motion_Active        = 0;
-uint8_t mqtt_Global_MasterPresent        = 0;
-uint8_t mqtt_Global_MasterPCPresent      = 0;
+uint8_t mqtt_Global_Color_Fadespeed       = 20; //Needs Init for Startup with WiFi and MQTT Effect
+uint8_t mqtt_Global_Brightness_Fadespeed  = 20; //""
+uint16_t mqtt_Global_Good_Night_Timeout   = 0;
+uint16_t mqtt_Global_Good_Morning_Timeout = 0;
+uint8_t mqtt_Global_Party                 = 0;
+uint8_t mqtt_Global_Weekend               = 0;
+uint8_t mqtt_Global_Force                 = 0;
+uint8_t mqtt_Global_GoodNight             = 0;
+uint8_t mqtt_Global_GoodMorning           = 0;
+uint8_t mqtt_Global_Motion_Active         = 0;
+uint8_t mqtt_Global_MasterPresent         = 0;
+uint8_t mqtt_Global_MasterPCPresent       = 0;
 
 //# Specific #//
 //---- LED ----//
@@ -260,16 +277,25 @@ uint8_t mqtt_Motion_Timout      = 0;
 uint16_t Information_MainState               = 0;
 uint16_t Information_LightState              = 0;
 
-uint8_t Information_mqtt_Global_Color_Fadespeed      = 0;
-uint8_t Information_mqtt_Global_Brightness_Fadespeed = 0;
-uint16_t Information_mqtt_Global_Good_Night_Timeout  = 0;
-uint8_t Information_mqtt_Global_Party                = 0;
-uint8_t Information_mqtt_Global_Weekend              = 0;
-uint8_t Information_mqtt_Global_Force                = 0;
-uint8_t Information_mqtt_Global_GoodNight            = 0;
-uint8_t Information_mqtt_Global_Motion_Active        = 0;
-uint8_t Information_mqtt_Global_MasterPresent        = 0;
-uint8_t Information_mqtt_Global_MasterPCPresent      = 0;
+//# System #//
+uint8_t Information_mqtt_System_Reboot = 0;
+
+//# Global #//
+uint8_t Information_mqtt_Global_Color_Fadespeed       = 0;
+uint8_t Information_mqtt_Global_Brightness_Fadespeed  = 0;
+uint16_t Information_mqtt_Global_Good_Night_Timeout   = 0;
+uint16_t Information_mqtt_Global_Good_Morning_Timeout = 0;
+uint8_t Information_mqtt_Global_Party                 = 0;
+uint8_t Information_mqtt_Global_Weekend               = 0;
+uint8_t Information_mqtt_Global_Force                 = 0;
+uint8_t Information_mqtt_Global_GoodNight             = 0;
+uint8_t Information_mqtt_Global_GoodMorning           = 0;
+uint8_t Information_mqtt_Global_Motion_Active         = 0;
+uint8_t Information_mqtt_Global_MasterPresent         = 0;
+uint8_t Information_mqtt_Global_MasterPCPresent       = 0;
+
+//# Specific #//
+//---- LED ----//
 
 uint8_t Information_mqtt_LED_Active_1       = 0;
 uint8_t Information_mqtt_LED_Red_1          = 0;
@@ -314,12 +340,14 @@ unsigned long PrevMillis_ColorFadeSpeedStrip2        = 0;
 unsigned long PrevMillis_EffectPartyMode             = 0;
 unsigned long PrevMillis_EffectWeekendMode           = 0;
 unsigned long PrevMillis_EffectForceMode             = 0;
-unsigned long PrevMillis_EffectGoodNightMode         = 0;
+unsigned long PrevMillis_GoodNightMode               = 0;
+unsigned long PrevMillis_GoodMorningMode             = 0;
 unsigned long PrevMillis_ApiTimeUpdateRate           = 0;
 unsigned long PrevMillis_ApiSunUpdateRate            = 0;
 unsigned long PrevMillis_MotionDetected              = 0;
 unsigned long PrevMillis_HeartBeat                   = 0;
 unsigned long PrevMillis_ReatDHTSensorData           = 0;
+unsigned long PrevMillis_SystemRebootDelay           = 0;
 
 
 unsigned long TimeOut_Example                  = 1000;   // 1.00 Seconds
@@ -330,6 +358,7 @@ unsigned long TimeOut_EffectForceMode          = 60000;  // 1.00 Minute
 unsigned long TimeOut_ApiUpdateRate            = 60000;  // 1.00 Minute
 unsigned long TimeOut_HeartBeat                = 300000; // 5.00 Minute
 unsigned long TimeOut_ReatDHTSensorData        = 60000;  // 1.00 Minute
+unsigned long TimeOut_SystemRebootDelay        = 5000;   // 0.05 Minute
 
 /*
   unsigned long CurMillis_Example = millis();
