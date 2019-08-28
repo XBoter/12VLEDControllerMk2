@@ -203,9 +203,11 @@ void LoopController() {
             } else {
               NormalLight(1);
             }
-
+            //Reset Good Morning Mode
+            StateGoodMorning = 0;
           } else {
-
+            //Reset Good Night Mode
+            StateGoodNight = 0;
             if (mqtt_Global_GoodMorning and GoodMorningModeEnabled) {
               GoodMorningMode();
             } else {
@@ -233,9 +235,11 @@ void LoopController() {
             } else {
               NormalLight(2);
             }
-
+            //Reset Good Morning Mode
+            StateGoodMorning = 0;
           } else {
-
+            //Reset Good Night Mode
+            StateGoodNight = 0;
             if (mqtt_Global_GoodMorning and GoodMorningModeEnabled) {
               GoodMorningMode();
             } else {

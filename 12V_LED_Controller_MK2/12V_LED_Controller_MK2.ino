@@ -1,9 +1,9 @@
 
 //Config for Functions of the Controller (Prio from Top to Bottom)
 #define LED_STRIP_COUNT 1   //Defines how many LED Strips are Controlled    (Options: 1 and 2)
-#define MOTION_SENSORS 1     //Defines how many Motion Sensors are available (Options: 0, 1 and 2)
+#define MOTION_SENSORS 0     //Defines how many Motion Sensors are available (Options: 0, 1 and 2)
 #define IR_RECIVER 0        //Defines how many IR Receiver are available    (Options: 0 and 1)
-#define DHT_SENSOR 1        //Defines how many DHT Sensors are available    (Options: 0 and 1)
+#define DHT_SENSOR 0        //Defines how many DHT Sensors are available    (Options: 0 and 1)
 
 //+++ Include Libarys +++//
 #include <Arduino.h>
@@ -21,8 +21,8 @@
 //#define Controller_WardrobeMiddle
 //#define Controller_Shelf
 //#define Controller_Shelf_Down
-//#define Controller_TvStand
-#define Controller_Kitchen
+#define Controller_TvStand
+//#define Controller_Kitchen
 //#define Controller_Bath
 
 //Used for New Network Parameter
@@ -44,15 +44,15 @@
 #define Name        "12V LED Controller Mk2"
 #define Programmer  "Nico Weidenfeller"
 #define Created     "06.06.2019"
-#define LastModifed "27.08.2019"
-#define Version     "1.1.1"
+#define LastModifed "28.08.2019"
+#define Version     "1.1.2"
 
 /*
   Name          :   12V LED Controller Mk2
   Programmer    :   Nico Weidenfeller
   Created       :   06.06.2019
-  Last Modifed  :   27.08.2019
-  Version       :   1.1.1
+  Last Modifed  :   28.08.2019
+  Version       :   1.1.2
   Description   :
 
   ToDoList      :   -
@@ -89,6 +89,8 @@
                       Fixed Good Night Mode. And added Good Morning Mode. Tuned Weekend Effect Mode. Changed Party Effect Mode. Fixed Bug with LED Modes (Desk Controller is the new Master Controller for Effect Mode control).
                     Version 1.1.1
                       Added System Reboot Option over Mqtt to Reset System.
+                    Version 1.1.2
+                      Fixed Bug with Good Morning Mode Reset.
 
 */
 
