@@ -93,6 +93,10 @@ void mqtt() {
         mqtt_Client.subscribe( mqtt_value_Motion_Timeout );
       }
 
+      //*** API ***//
+      mqtt_Client.subscribe( mqtt_api_state_sun );
+      mqtt_Client.subscribe( mqtt_api_state_time );
+
       Serial.println("Finished channel subscription");
 
       MqttConnectCounter++;
@@ -293,6 +297,19 @@ void callback(char* topic, byte * payload, unsigned int length) {
   //------------------- Parameter [mqtt_Motion_Timout] -------------------//
   if (String(mqtt_value_Motion_Timeout).equals(topic)) {
     mqtt_Motion_Timout = atoi(message);
+  }
+
+  //######################################## API ########################################//
+
+  if (String(mqtt_api_state_sun).equals(topic)) {
+    api_SunDown = atoi(message);
+  }
+
+  if (String(mqtt_api_state_time).equals(topic)) {
+    String hour = strtok(message, ":");   //Time Hour
+    String minute = strtok(NULL, "\0");    //Time Minute
+    api_TimeHour = hour.toInt();
+    api_TimeMinute = minute.toInt();
   }
 
 }

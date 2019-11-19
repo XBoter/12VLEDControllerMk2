@@ -1,7 +1,7 @@
 
 //Config for Functions of the Controller (Prio from Top to Bottom)
 #define LED_STRIP_COUNT 1   //Defines how many LED Strips are Controlled    (Options: 1 and 2)
-#define MOTION_SENSORS 0     //Defines how many Motion Sensors are available (Options: 0, 1 and 2)
+#define MOTION_SENSORS 2     //Defines how many Motion Sensors are available (Options: 0, 1 and 2)
 #define IR_RECIVER 0        //Defines how many IR Receiver are available    (Options: 0 and 1)
 #define DHT_SENSOR 0        //Defines how many DHT Sensors are available    (Options: 0 and 1)
 
@@ -21,9 +21,9 @@
 //#define Controller_WardrobeMiddle
 //#define Controller_Shelf
 //#define Controller_Shelf_Down
-#define Controller_TvStand
+//#define Controller_TvStand
 //#define Controller_Kitchen
-//#define Controller_Bath
+#define Controller_Bath
 
 //Used for New Network Parameter
 #define NicoNetworkSettings
@@ -44,15 +44,15 @@
 #define Name        "12V LED Controller Mk2"
 #define Programmer  "Nico Weidenfeller"
 #define Created     "06.06.2019"
-#define LastModifed "28.08.2019"
-#define Version     "1.1.2"
+#define LastModifed "19.11.2019"
+#define Version     "1.1.3"
 
 /*
   Name          :   12V LED Controller Mk2
   Programmer    :   Nico Weidenfeller
   Created       :   06.06.2019
-  Last Modifed  :   28.08.2019
-  Version       :   1.1.2
+  Last Modifed  :   19.11.2019
+  Version       :   1.1.3
   Description   :
 
   ToDoList      :   -
@@ -91,6 +91,8 @@
                       Added System Reboot Option over Mqtt to Reset System.
                     Version 1.1.2
                       Fixed Bug with Good Morning Mode Reset.
+                    Version 1.1.3
+                      Added MQTT Path for API data because of Homeassistant V_101 api accces with password is no longer available
 
 */
 

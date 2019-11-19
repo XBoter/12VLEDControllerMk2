@@ -101,9 +101,11 @@ void LoopController() {
   }
 
   //-- API --//
+  /*
   if ((WiFi.status() == WL_CONNECTED) and mqtt_Client.connected() and !http_Client.connected()) {
     api();
   }
+  */
 
   //-- HeartBeat --//
   HeartBeat();
@@ -112,8 +114,8 @@ void LoopController() {
   printer();
 
   //-- GetApiData --//
-  GetApiTimeData();
-  GetApiSunData();
+  //GetApiTimeData();
+  //GetApiSunData();
 
   //-- Motion Detection --//
   MotionBrightnessControl();
